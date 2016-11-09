@@ -1,0 +1,12 @@
+resolver: lts-7.7
+
+packages:
+- '.'
+
+extra-deps:
+- http-dispatch-0.5.0.2
+- freer-0.2.2.6
+
+flags: {}
+
+extra-package-dbs: []
