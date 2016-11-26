@@ -17,6 +17,9 @@ handleToChan chan connection = do
 
   WS.sendClose connection ("bye from handler!" :: T.Text)
 
-websocketRunChannel :: (WS.WebSocketsData a) => Chan a -> String -> String -> IO()
-websocketRunChannel chan host path = withSocketsDo $ runSecureClient host 443 path f
+-- Given a channel, host and path
+-- Start a secure websocket client on host and path,
+-- and pipe all server messages to the channel
+websocketClientRunResponseChannel :: (WS.WebSocketsData a) => Chan a -> String -> String -> IO()
+websocketClientRunResponseChannel chan host path = withSocketsDo $ runSecureClient host 443 path f
   where f = handleToChan chan

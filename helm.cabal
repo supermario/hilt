@@ -19,6 +19,8 @@ library
                      , Helm.Storage.TVar
                      , Helm.Socket
                      , Helm.PostgresSimple
+                     , Helm.Channel
+                     , Helm.Channel.Stm
 
   build-depends:       base >= 4.7 && < 5
                        , random
