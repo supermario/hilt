@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Helm.Socket where
+module Helm.SocketClient where
 
 import           Control.Monad       (forever)
 import           Network.Socket      (withSocketsDo)

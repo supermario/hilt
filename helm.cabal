@@ -17,7 +17,9 @@ library
                      , Helm.Logger.StdOut
                      , Helm.Storage
                      , Helm.Storage.TVar
-                     , Helm.Socket
+                     , Helm.SocketClient
+                     , Helm.SocketServer
+                     , Helm.SocketServer.Echo
                      , Helm.PostgresSimple
                      , Helm.Channel
                      , Helm.Channel.Stm
