@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Helm.SocketServer.Echo (withHandle) where
 
 import Data.Char (isPunctuation, isSpace)

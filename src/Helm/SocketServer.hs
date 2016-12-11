@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Helm.SocketServer where
 
 import qualified Data.Text as T

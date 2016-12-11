@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Helm.SocketClient where
 
 import           Control.Monad       (forever)

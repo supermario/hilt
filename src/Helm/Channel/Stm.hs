@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Helm.Channel.Stm (withHandle) where
 
 import qualified Data.Text as T

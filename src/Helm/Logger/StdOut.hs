@@ -1,5 +1,3 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 -- | A logger implementation that logs all messages to a 'System.IO.Handle'.
 module Helm.Logger.StdOut (withHandle) where
 

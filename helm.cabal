@@ -39,6 +39,7 @@ library
                        , managed
                        , postgresql-simple
   default-language:    Haskell2010
+  default-extensions:  OverloadedStrings
 
 test-suite helm-test
   type:                exitcode-stdio-1.0
