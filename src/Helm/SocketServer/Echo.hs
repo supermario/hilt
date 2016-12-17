@@ -1,4 +1,4 @@
-module Helm.SocketServer.Echo (withHandle) where
+module Helm.SocketServer.Echo (load, withHandle) where
 
 import Data.Char (isPunctuation, isSpace)
 import Data.Monoid ((<>))
@@ -17,6 +17,9 @@ import qualified Helm.Channel      as Channel
 
 import System.Random
 
+import Control.Monad.Managed (managed)
+
+load introText = managed $ withHandle introText
 
 withHandle :: T.Text -> (SocketServer.Handle -> IO a) -> IO a
 withHandle introText f = do

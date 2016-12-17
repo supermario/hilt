@@ -1,6 +1,6 @@
-module Helm (manage, manageTest, someFunc) where
+module Helm (manage, program, manageTest, someFunc) where
 
-import Control.Monad.Managed (runManaged, liftIO)
+import Control.Monad.Managed (runManaged, liftIO, Managed, MonadIO)
 import Control.Concurrent    (threadDelay)
 import Control.Monad         (forever)
 
@@ -18,3 +18,7 @@ manage things = do
 manageTest things = do
   runManaged $ do
     things
+
+-- Utility function to avoid Control.Monad.Managed imports
+program :: MonadIO m => IO a -> m a
+program = liftIO

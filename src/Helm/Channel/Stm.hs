@@ -1,4 +1,4 @@
-module Helm.Channel.Stm (withHandle) where
+module Helm.Channel.Stm (load, withHandle) where
 
 import qualified Data.Text as T
 
@@ -8,6 +8,10 @@ import Control.Concurrent.STM       (STM, atomically)
 import Control.Concurrent.STM.TChan (TChan, newTChan, readTChan, writeTChan)
 
 import qualified Helm.Channel as Channel
+
+import Control.Monad.Managed (managed)
+
+load = managed withHandle
 
 withHandle :: (Channel.Handle -> IO a) -> IO a
 withHandle f = do

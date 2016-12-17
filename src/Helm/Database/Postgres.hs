@@ -1,4 +1,4 @@
-module Helm.Database.Postgres (withHandle) where
+module Helm.Database.Postgres (load, withHandle) where
 
 import Control.Monad.Logger        (runNoLoggingT, runStdoutLoggingT)
 import Database.Persist.Sql        (runSqlPersistMPool, ConnectionPool)
@@ -12,6 +12,10 @@ import qualified Web.Heroku.Persist.Postgresql  as Heroku
 
 import qualified Helm.Database as Database
 import qualified Helm.Config as Config
+
+import Control.Monad.Managed (managed)
+
+load = managed withHandle
 
 withHandle :: (Database.Handle -> IO a) -> IO a
 withHandle f = do
