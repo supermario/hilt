@@ -5,7 +5,9 @@ packages:
 
 extra-deps:
 - http-dispatch-0.5.0.2
-- freer-0.2.2.6
+- heroku-0.1.2.3
+- heroku-persistent-0.2.0
+- postgresql-simple-url-0.1.0.1
 
 flags: {}
 

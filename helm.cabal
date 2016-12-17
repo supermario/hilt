@@ -1,6 +1,6 @@
 name:                helm
 version:             0.0.0.1
-synopsis:            Initial project template from stack
+synopsis:            An experimental framework for Haskell + Elm
 description:         Please see README.md
 homepage:            https://github.com/supermario/helm#readme
 author:              Mario Rogic
@@ -13,6 +13,7 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     Helm
+                     , Helm.Config
                      , Helm.Logger
                      , Helm.Logger.StdOut
                      , Helm.Storage
@@ -23,6 +24,8 @@ library
                      , Helm.PostgresSimple
                      , Helm.Channel
                      , Helm.Channel.Stm
+                     , Helm.Database
+                     , Helm.Database.Postgres
 
   build-depends:       base >= 4.7 && < 5
                        , random
@@ -38,6 +41,19 @@ library
                        , stm
                        , managed
                        , postgresql-simple
+                       , monad-logger
+                       , persistent
+                       , persistent-sqlite
+                       , persistent-postgresql
+                       , postgresql-simple
+                       , postgresql-simple-url
+                       , wai-extra
+                       , heroku
+                       , heroku-persistent
+                       , wai
+                       , monad-control
+                       , resourcet
+
   default-language:    Haskell2010
   default-extensions:  OverloadedStrings
 
