@@ -1,7 +1,9 @@
 module Helm.Config where
 
-import Text.Read                         (readMaybe)
-import qualified System.Environment as E (lookupEnv)
+import Text.Read                            (readMaybe)
+import qualified System.Environment as E    (lookupEnv)
+import Network.Wai                          (Middleware)
+import Network.Wai.Middleware.RequestLogger (logStdoutDev, logStdout)
 
 data Environment =
     Development
@@ -25,3 +27,9 @@ lookupEnvString name defaultVal = do
   return $ case param of
     Nothing -> defaultVal
     Just a  -> a
+
+logger :: Environment -> Middleware
+logger Test        = id
+logger Development = logStdoutDev
+logger Staging     = logStdoutDev
+logger Production  = logStdout

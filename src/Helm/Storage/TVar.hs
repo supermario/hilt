@@ -6,8 +6,9 @@ import qualified Helm.Storage as Storage
 import qualified Data.Text as T
 import           Data.Monoid ((<>))
 
-import Control.Monad.Managed (managed)
+import Control.Monad.Managed (Managed, managed)
 
+load :: Logger.Handle -> Managed Storage.Handle
 load loggerH = managed $ withHandle loggerH
 
 withHandle :: Logger.Handle -> (Storage.Handle -> IO a) -> IO a

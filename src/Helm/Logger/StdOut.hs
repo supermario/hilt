@@ -6,8 +6,9 @@ import           Data.Monoid ((<>))
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
 
-import Control.Monad.Managed (managed)
+import Control.Monad.Managed (Managed, managed)
 
+load :: Managed Logger.Handle
 load = managed withHandle
 
 withHandle :: (Logger.Handle -> IO a) -> IO a

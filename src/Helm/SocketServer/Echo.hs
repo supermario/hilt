@@ -1,24 +1,20 @@
 module Helm.SocketServer.Echo (load, withHandle) where
 
-import Data.Char (isPunctuation, isSpace)
-import Data.Monoid ((<>))
-import Data.Text (Text)
-import Control.Exception (finally)
-import Control.Monad (forM_, forever)
-import Control.Concurrent (MVar, newMVar, modifyMVar_, modifyMVar, readMVar)
+import Data.Char             (isPunctuation, isSpace)
+import Data.Monoid           ((<>))
+import Data.Text             (Text)
+import Control.Exception     (finally)
+import Control.Monad         (forM_, forever)
+import Control.Concurrent    (MVar, newMVar, modifyMVar_, modifyMVar, readMVar)
 import qualified Data.Text as T
 import qualified Data.Text.IO as T
-
 import qualified Network.WebSockets as WS
 
 import qualified Helm.SocketServer as SocketServer
-import qualified Helm.Logger       as Logger
-import qualified Helm.Channel      as Channel
 
-import System.Random
+import Control.Monad.Managed (Managed, managed)
 
-import Control.Monad.Managed (managed)
-
+load :: T.Text -> Managed SocketServer.Handle
 load introText = managed $ withHandle introText
 
 withHandle :: T.Text -> (SocketServer.Handle -> IO a) -> IO a
@@ -70,7 +66,7 @@ taggedApplication mState introText pendingConn = do
         client     = (T.drop (T.length prefix) msg, conn)
         disconnect = do
           -- Remove client and return new state
-          s <- modifyMVar mState $ \s ->
+          _ <- modifyMVar mState $ \s ->
             let s' = removeClient client s in return (s', s')
           return ()
         sendText t = WS.sendTextData conn (t :: Text)
@@ -91,9 +87,6 @@ wsNewClients = newMVar newServerState
 
 newServerState :: ServerState
 newServerState = []
-
-numClients :: ServerState -> Int
-numClients = length
 
 clientExists :: Client -> ServerState -> Bool
 clientExists client = any ((== fst client) . fst)

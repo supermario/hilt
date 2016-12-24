@@ -13,8 +13,9 @@ import qualified Web.Heroku.Persist.Postgresql  as Heroku
 import qualified Helm.Database as Database
 import qualified Helm.Config as Config
 
-import Control.Monad.Managed (managed)
+import Control.Monad.Managed (Managed, managed)
 
+load :: Managed Database.Handle
 load = managed withHandle
 
 withHandle :: (Database.Handle -> IO a) -> IO a

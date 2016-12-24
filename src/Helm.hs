@@ -1,3 +1,5 @@
+{-# LANGUAGE Rank2Types #-}
+
 module Helm (manage, program, manageTest, someFunc) where
 
 import Control.Monad.Managed (runManaged, liftIO, Managed, MonadIO)
@@ -7,14 +9,15 @@ import Control.Monad         (forever)
 someFunc :: IO ()
 someFunc = putStrLn "someFunc"
 
+manage :: forall a. Managed a -> IO ()
 manage things = do
   runManaged $ do
     liftIO $ putStrLn "Starting under Helm management..."
-    things
+    _ <- things
     -- wait until the the process is killed
     forever $ liftIO $ threadDelay 100000
 
---
+manageTest :: Managed () -> IO ()
 manageTest things = do
   runManaged $ do
     things
