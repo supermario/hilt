@@ -14,7 +14,7 @@ load = managed withHandle
 
 withHandle :: (Channel.Handle -> IO a) -> IO a
 withHandle f = do
-  chan <- atomically (do newTChan :: STM (TChan a))
+  chan <- atomically $ (newTChan :: STM (TChan a))
 
   f Channel.Handle
     { Channel.read = readImpl chan

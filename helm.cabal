@@ -21,6 +21,7 @@ library
                      , Helm.SocketClient
                      , Helm.SocketServer
                      , Helm.SocketServer.Echo
+                     , Helm.SocketServer.Hooked
                      , Helm.PostgresSimple
                      , Helm.Channel
                      , Helm.Channel.Stm
