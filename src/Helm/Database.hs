@@ -1,5 +1,8 @@
 {-# LANGUAGE Rank2Types #-}
 
+{-|
+Database service
+-}
 module Helm.Database where
 
 import           Control.Monad.Logger         (NoLoggingT)

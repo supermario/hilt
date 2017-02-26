@@ -13,7 +13,7 @@ import qualified Helm.SocketServer as SocketServer
 import Control.Monad.Managed (Managed, managed)
 
 load :: Managed SocketServer.Handle
-load = managed $ withHandle
+load = managed withHandle
 
 withHandle :: (SocketServer.Handle -> IO a) -> IO a
 withHandle f = do
@@ -54,7 +54,7 @@ talk :: WS.Connection -> MVar ServerState -> Client -> IO ()
 talk conn state (user, _) = forever $ do
   msg <- WS.receiveData conn
   readMVar state >>= broadcast
-    ((T.pack $ show user) <> ":" <> msg)
+    (T.pack (show user) <> ":" <> msg)
 
 addClient :: Client -> ServerState -> ServerState
 addClient client clients = client : clients

@@ -1,4 +1,4 @@
-module Helm.SocketServer.Hooked (load, withHandle) where
+module Helm.SocketServer.Hooked (load, loadDefault, withHandle) where
 
 import Data.Monoid           ((<>))
 import Control.Exception     (finally)
@@ -14,6 +14,12 @@ import Control.Monad.Managed (Managed, managed)
 
 load :: OnJoined -> Managed SocketServer.Handle
 load onJoined = managed $ withHandle onJoined
+
+loadDefault :: OnJoined -> Managed SocketServer.Handle
+loadDefault onJoined = managed $ withHandle onJoined
+
+onJoinedDefault :: OnJoined
+onJoinedDefault name totalClients = return ()
 
 withHandle :: OnJoined -> (SocketServer.Handle -> IO a) -> IO a
 withHandle onJoined f = do
@@ -59,7 +65,7 @@ talk :: WS.Connection -> MVar ServerState -> Client -> IO ()
 talk conn state (user, _) = forever $ do
   msg <- WS.receiveData conn
   readMVar state >>= broadcast
-    ((T.pack $ show user) <> ":" <> msg)
+    (T.pack (show user) <> ":" <> msg)
 
 addClient :: Client -> ServerState -> ServerState
 addClient client clients = client : clients
