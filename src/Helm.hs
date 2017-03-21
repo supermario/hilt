@@ -77,14 +77,17 @@ module Helm
   , manageTest)
   where
 
-import           Control.Concurrent    (threadDelay)
-import           Control.Monad         (forever)
-import           Control.Monad.Managed (Managed, MonadIO, liftIO, runManaged)
+import Control.Concurrent    (threadDelay)
+import Control.Monad         (forever)
+import Control.Monad.Managed (Managed, MonadIO, liftIO, runManaged)
+import System.IO (hSetBuffering, BufferMode(..), stdout)
 
 -- | Wrapper for runManaged that than runs forever. See example above for usage.
 manage :: forall a. Managed a -> IO ()
 manage things =
   runManaged $ do
+    -- Force LineBuffering for consistent output behavior
+    liftIO $ hSetBuffering stdout LineBuffering
     liftIO $ putStrLn "Starting under Helm management..."
     _ <- things
     -- wait until the the process is killed
