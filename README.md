@@ -4,9 +4,9 @@
 
 Helm is a batteries-included implementation of the [service pattern](https://www.schoolofhaskell.com/user/meiersi/the-service-pattern).
 
-It eschews type class and mtl approaches (ala ['Scrap your type classes'](http://www.haskellforall.com/2012/05/scrap-your-type-classes.html)) to experiment with a more implicit value level approach.
+It eschews typeclass and mtl approaches (ala ['Scrap your type classes'](http://www.haskellforall.com/2012/05/scrap-your-type-classes.html)) to experiment with a more explicit value level approach.
 
-It is intended to be used at the base level of your application, providing some structure for your IO-generating business logic.
+It is intended to be used at the base level of your Haskell application, providing some structure for your IO-generating business logic. See the Quick Example below to get a feel for what that looks like in practice.
 
 ## Service Types
 
