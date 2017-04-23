@@ -1,5 +1,20 @@
 module Helm.Database.Postgres (load, withHandle) where
 
+{-|
+
+== Usage
+
+Basic RDBMS style querying. Provides a couple of query functions while managing DB pool.
+
+The service looks for a DATABASE_URL ENV var containing a postgresql URL on load.
+
+== Quick Example
+
+@
+-- TODO
+@
+-}
+import Data.Maybe                  (fromMaybe)
 import Control.Monad.Logger        (runNoLoggingT, runStdoutLoggingT)
 import Database.Persist.Sql        (runSqlPersistMPool, ConnectionPool)
 import Database.Persist.Postgresql (ConnectionString, createPostgresqlPool, pgConnStr)
@@ -25,7 +40,7 @@ withHandle f = do
   env       <- Config.lookupEnv "ENV" Config.Development
 
   pool      <- makePool env
-  rawConfig <- makePoolRaw env
+  rawConfig <- makePoolRaw
 
   -- @TODO how do implementations log? Should they demand a logger?
   -- putStrLn $ "RawConfig:" ++ rawConfig
@@ -40,30 +55,24 @@ withHandle f = do
 runDbRaw :: (SQL.FromRow a) => SQL.ConnectInfo -> SQL.Query -> IO [a]
 runDbRaw creds query = do
   conn <- SQL.connect creds
-  SQL.query_ conn query >>= return
+  SQL.query_ conn query
 
 
 runDbRawP :: (SQL.FromRow a, SQL.ToRow b) => SQL.ConnectInfo -> SQL.Query -> b -> IO [a]
 runDbRawP creds query p = do
   conn <- SQL.connect creds
-  SQL.query conn query p >>= return
+  SQL.query conn query p
 
 
 
 -- Persistent Pool
 
 makePool :: Config.Environment -> IO ConnectionPool
-makePool Config.Test        = runNoLoggingT     $ createSqlitePool (sqlDatabase $ sqliteConf Config.Test) (envPoolSize Config.Test)
-makePool Config.Development = runStdoutLoggingT $ createPostgresqlPool psqlConf (envPoolSize Config.Development)
+makePool Config.Test = runNoLoggingT $ createSqlitePool (sqlDatabase $ sqliteConf Config.Test) (envPoolSize Config.Test)
 makePool e = do
-  -- Staging / Production envs use Postgres and DATABASE_URL
+  -- Development / Staging / Production envs use Postgres and DATABASE_URL
   connStr <- lookupDatabaseUrl
   runStdoutLoggingT $ createPostgresqlPool connStr (envPoolSize e)
-
--- For development
--- @ISSUE read default from someone controllable by user?
-psqlConf :: ConnectionString
-psqlConf = "host=127.0.0.1 dbname=ap_test user=postgres password= port=5432"
 
 -- For staging/prod
 -- Fetch postgres formatted DATABASE_URL ENV var (ala Heroku) and return Persistant ConnectionString
@@ -84,23 +93,15 @@ sqliteConf _ = undefined
 
 -- PostgreSQL.Simple Pool
 
-makePoolRaw :: Config.Environment -> IO SQL.ConnectInfo
-makePoolRaw e = do
+makePoolRaw :: IO SQL.ConnectInfo
+makePoolRaw = do
   connStr <- Config.lookupEnvString "DATABASE_URL" ""
-
-  return $ case connStr of
-    "" -> defaultConnectInfo
-    _  -> case e of
-      Config.Test        -> defaultConnectInfo
-      Config.Development -> defaultConnectInfo
-      _           -> case SQLU.parseDatabaseUrl connStr of
-        Nothing          -> defaultConnectInfo
-        Just connectInfo -> connectInfo
+  return $ fromMaybe defaultConnectInfo (SQLU.parseDatabaseUrl connStr)
 
 -- @ISSUE read default from someone controllable by user?
 defaultConnectInfo :: SQL.ConnectInfo
 defaultConnectInfo = SQL.defaultConnectInfo
     { SQL.connectUser = "postgres"
     , SQL.connectPassword = ""
-    , SQL.connectDatabase = "ap_test"
+    , SQL.connectDatabase = "helm_development"
     }
