@@ -18,9 +18,6 @@ load onJoined = managed $ withHandle onJoined
 loadDefault :: OnJoined -> Managed SocketServer.Handle
 loadDefault onJoined = managed $ withHandle onJoined
 
-onJoinedDefault :: OnJoined
-onJoinedDefault name totalClients = return ()
-
 withHandle :: OnJoined -> (SocketServer.Handle -> IO a) -> IO a
 withHandle onJoined f = do
   mClients <- newMVar []
@@ -31,6 +28,8 @@ withHandle onJoined f = do
     , SocketServer.app = appImpl mClients mNames onJoined
     }
 
+-- Arguments represent;
+-- OnJoined = name -> totalClients -> IO ()
 type OnJoined = Int -> Int -> IO ()
 
 type Client = (Int, WS.Connection)
