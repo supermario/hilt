@@ -1,13 +1,14 @@
-resolver: lts-7.9
+resolver: lts-7.24
 
 packages:
 - '.'
 
 extra-deps:
-- http-dispatch-0.5.0.2
 - heroku-0.1.2.3
 - heroku-persistent-0.2.0
+- http-dispatch-0.5.0.2
 - postgresql-simple-url-0.1.0.1
+- unagi-chan-0.4.0.0
 
 flags: {}
 
