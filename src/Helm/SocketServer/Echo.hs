@@ -10,6 +10,8 @@ import qualified Network.WebSockets as WS
 
 import qualified Helm.SocketServer as SocketServer
 
+-- @TODO all logging should go via handler dependency so user can control behavior
+
 import Control.Monad.Managed (Managed, managed)
 
 load :: Managed SocketServer.Handle

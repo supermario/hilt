@@ -25,13 +25,22 @@ See example below for an overview.
 
 ## Implementations
 
-Helm currently provides the following implementations:
+Helm currently provides the following implementations of the Service Types:
 
+### Logger
 * [Helm.Logger.StdOut](src/Helm/Logger/StdOut.hs): prints logged items to stdout
-* [Helm.Channel.Stm](src/Helm/Channel/Stm.hs): A software-transactional-memory implementation of channels
+
+### Channel
+* [Helm.Channel.Stm](src/Helm/Channel/Stm.hs): A software-transactional-memory implementation of channels, using `Control.Concurrent.STM.TChan`
+* [Helm.Channel.Stm](src/Helm/Channel/Stm.hs): A faster implementation of channels using the [unagi-chan](https://github.com/jberryman/unagi-chan) library
+
+### Database
 * [Helm.Database.Postgres](src/Helm/Database/Postgres.hs): provides a couple of query functions while managing DB pool
+
+### SocketServer
 * [Helm.SocketServer.Echo](src/Helm/SocketServer/Echo.hs): echoes back client responses without any handling
 * [Helm.SocketServer.Hooked](src/Helm/SocketServer/Hooked.hs): takes extra function i.e. `onJoined name totalClients :: Int -> Int -> IO ()` that will be run for every client join
+* [Helm.SocketServer.Stm](src/Helm/SocketServer/Hooked.hs): a software-transactional-memory version of `Helm.SocketServer.Hooked`.
 
 They can be used directly, or simply as reference code to pull out and create your own services as needed, they are intended to be compact and easy to understand.
 

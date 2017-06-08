@@ -10,6 +10,8 @@ import Control.Concurrent.STM
 
 import qualified Helm.SocketServer as SocketServer
 
+-- @TODO all logging should go via handler dependency so user can control behavior
+
 import Control.Monad.Managed (Managed, managed)
 
 load :: OnJoined -> Managed SocketServer.Handle
@@ -75,11 +77,9 @@ appImpl mClients mNames onJoined pendingConn = do
     talk conn mClients client
 
 talk :: WS.Connection -> TClients -> Client -> IO ()
--- talk conn mClients (user, _) = forever $ do
 talk conn _ (user, _) = forever $ do
   msg <- WS.receiveData conn
   T.putStrLn ("[Debug] SocketServer:received:" <> T.pack (show user) <> ":" <> msg)
-  -- readTVar mClients >>= broadcast (T.pack (show user) <> ":" <> msg)
 
 addClient :: Client -> Clients -> Clients
 addClient client clients = client : clients
