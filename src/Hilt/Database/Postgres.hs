@@ -1,4 +1,4 @@
-module Helm.Database.Postgres (load, withHandle) where
+module Hilt.Database.Postgres (load, withHandle) where
 
 {-|
 
@@ -25,8 +25,8 @@ import qualified Database.PostgreSQL.Simple.URL as SQLU
 
 import qualified Web.Heroku.Persist.Postgresql  as Heroku
 
-import qualified Helm.Database as Database
-import qualified Helm.Config as Config
+import qualified Hilt.Database as Database
+import qualified Hilt.Config as Config
 
 import Control.Monad.Managed (Managed, managed)
 
@@ -103,5 +103,5 @@ defaultConnectInfo :: SQL.ConnectInfo
 defaultConnectInfo = SQL.defaultConnectInfo
     { SQL.connectUser = "postgres"
     , SQL.connectPassword = ""
-    , SQL.connectDatabase = "helm_development"
+    , SQL.connectDatabase = "hilt_development"
     }

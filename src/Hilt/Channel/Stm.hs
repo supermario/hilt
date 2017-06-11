@@ -1,11 +1,11 @@
-module Helm.Channel.Stm (load, withHandle) where
+module Hilt.Channel.Stm (load, withHandle) where
 
 import Control.Monad                (forever)
 import Control.Concurrent.STM       (STM, atomically)
 import Control.Concurrent.STM.TChan (TChan, newTChan, readTChan, writeTChan)
 import SlaveThread as ST
 
-import qualified Helm.Channel as Channel
+import qualified Hilt.Channel as Channel
 
 import Control.Monad.Managed (Managed, managed)
 

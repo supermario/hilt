@@ -1,8 +1,8 @@
 -- | A logger implementation that logs all messages to a 'System.IO.Handle'.
-module Helm.Storage.TVar (load, withHandle) where
+module Hilt.Storage.TVar (load, withHandle) where
 
-import qualified Helm.Logger as Logger
-import qualified Helm.Storage as Storage
+import qualified Hilt.Logger as Logger
+import qualified Hilt.Storage as Storage
 import qualified Data.Text as T
 import           Data.Monoid ((<>))
 

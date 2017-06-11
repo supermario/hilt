@@ -1,4 +1,4 @@
-module Helm.PostgresSimple (readSqlChar) where
+module Hilt.PostgresSimple (readSqlChar) where
 
 import Database.PostgreSQL.Simple.FromField       (returnError, ResultError (..), Field, Conversion)
 import Text.Read                                  (readMaybe)

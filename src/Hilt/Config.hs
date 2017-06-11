@@ -1,4 +1,4 @@
-module Helm.Config where
+module Hilt.Config where
 
 import Text.Read                            (readMaybe)
 import qualified System.Environment as E    (lookupEnv)

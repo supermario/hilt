@@ -1,19 +1,19 @@
 module Main where
 
 import           Data.Monoid        ((<>))
-import           Helm
-import qualified Helm
-import qualified Helm.Channel       as Channel
-import qualified Helm.Channel.Stm   as Channel.Stm
-import qualified Helm.Logger        as Logger
-import qualified Helm.Logger.StdOut as Logger.StdOut
+import           Hilt
+import qualified Hilt
+import qualified Hilt.Channel       as Channel
+import qualified Hilt.Channel.Stm   as Channel.Stm
+import qualified Hilt.Logger        as Logger
+import qualified Hilt.Logger.StdOut as Logger.StdOut
 
 main :: IO ()
 main =
-    Helm.manage $
+    Hilt.manage $
     do loggerH <- Logger.StdOut.load
        broadcastH <- Channel.Stm.load
-       Helm.program $
+       Hilt.program $
            do Logger.logDebug loggerH "Handlers initiating..."
               Channel.worker
                   broadcastH

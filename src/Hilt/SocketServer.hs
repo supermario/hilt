@@ -1,4 +1,4 @@
-module Helm.SocketServer where
+module Hilt.SocketServer where
 
 import qualified Data.Text as T
 import qualified Network.WebSockets as WS

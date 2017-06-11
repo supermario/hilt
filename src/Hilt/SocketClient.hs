@@ -1,4 +1,4 @@
-module Helm.SocketClient where
+module Hilt.SocketClient where
 
 import           Control.Monad       (forever)
 import           Network.Socket      (withSocketsDo)

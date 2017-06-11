@@ -1,4 +1,4 @@
-module Helm.Channel.Unagi (load, withHandle) where
+module Hilt.Channel.Unagi (load, withHandle) where
 
 import Control.Monad                (forever)
 import SlaveThread as ST
@@ -6,7 +6,7 @@ import SlaveThread as ST
 import Prelude hiding (read)
 import Control.Concurrent.Chan.Unagi
 
-import qualified Helm.Channel as Channel
+import qualified Hilt.Channel as Channel
 
 import Control.Monad.Managed (Managed, managed)
 

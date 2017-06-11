@@ -1,8 +1,8 @@
-name:                helm
+name:                hilt
 version:             0.0.0.1
 synopsis:            An experimental framework for Haskell + Elm
 description:         Please see README.md
-homepage:            https://github.com/supermario/helm#readme
+homepage:            https://github.com/supermario/hilt#readme
 author:              Mario Rogic
 maintainer:          hello@mario.net.au
 copyright:           2016 Mario Rogic
@@ -12,23 +12,23 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Helm
-                     , Helm.Config
-                     , Helm.Logger
-                     , Helm.Logger.StdOut
-                     , Helm.Storage
-                     , Helm.Storage.TVar
-                     , Helm.SocketClient
-                     , Helm.SocketServer
-                     , Helm.SocketServer.Echo
-                     , Helm.SocketServer.Hooked
-                     , Helm.SocketServer.Stm
-                     , Helm.PostgresSimple
-                     , Helm.Channel
-                     , Helm.Channel.Stm
-                     , Helm.Channel.Unagi
-                     , Helm.Database
-                     , Helm.Database.Postgres
+  exposed-modules:     Hilt
+                     , Hilt.Config
+                     , Hilt.Logger
+                     , Hilt.Logger.StdOut
+                     , Hilt.Storage
+                     , Hilt.Storage.TVar
+                     , Hilt.SocketClient
+                     , Hilt.SocketServer
+                     , Hilt.SocketServer.Echo
+                     , Hilt.SocketServer.Hooked
+                     , Hilt.SocketServer.Stm
+                     , Hilt.PostgresSimple
+                     , Hilt.Channel
+                     , Hilt.Channel.Stm
+                     , Hilt.Channel.Unagi
+                     , Hilt.Database
+                     , Hilt.Database.Postgres
 
   build-depends:       base >= 4.7 && < 5
                        , random
@@ -62,15 +62,15 @@ library
   default-language:    Haskell2010
   default-extensions:  OverloadedStrings
 
-test-suite helm-test
+test-suite hilt-test
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
   main-is:             Spec.hs
   build-depends:       base
-                     , helm
+                     , hilt
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   default-language:    Haskell2010
 
 source-repository head
   type:     git
-  location: https://github.com/supermario/helm
+  location: https://github.com/supermario/hilt

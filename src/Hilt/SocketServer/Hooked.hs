@@ -1,4 +1,4 @@
-module Helm.SocketServer.Echo (load, withHandle) where
+module Hilt.SocketServer.Hooked (load, loadDefault, withHandle) where
 
 import Data.Monoid           ((<>))
 import Control.Exception     (finally)
@@ -8,24 +8,31 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as T
 import qualified Network.WebSockets as WS
 
-import qualified Helm.SocketServer as SocketServer
+import qualified Hilt.SocketServer as SocketServer
 
 -- @TODO all logging should go via handler dependency so user can control behavior
 
 import Control.Monad.Managed (Managed, managed)
 
-load :: Managed SocketServer.Handle
-load = managed withHandle
+load :: OnJoined -> Managed SocketServer.Handle
+load onJoined = managed $ withHandle onJoined
 
-withHandle :: (SocketServer.Handle -> IO a) -> IO a
-withHandle f = do
+loadDefault :: OnJoined -> Managed SocketServer.Handle
+loadDefault onJoined = managed $ withHandle onJoined
+
+withHandle :: OnJoined -> (SocketServer.Handle -> IO a) -> IO a
+withHandle onJoined f = do
   mClients <- newMVar []
   mNames   <- newMVar [1..]
 
   f SocketServer.Handle
     { SocketServer.broadcast = broadcastImpl mClients
-    , SocketServer.app = appImpl mClients mNames
+    , SocketServer.app = appImpl mClients mNames onJoined
     }
+
+-- Arguments represent;
+-- OnJoined = name -> totalClients -> IO ()
+type OnJoined = Int -> Int -> IO ()
 
 type Client = (Int, WS.Connection)
 type ServerState = [Client]
@@ -36,8 +43,8 @@ broadcastImpl mClients message = do
   clients <- readMVar mClients
   broadcast message clients
 
-appImpl :: MVar ServerState -> MVar Names -> WS.ServerApp
-appImpl mState mNames pendingConn = do
+appImpl :: MVar ServerState -> MVar Names -> OnJoined -> WS.ServerApp
+appImpl mClients mNames onJoined pendingConn = do
   conn <- WS.acceptRequest pendingConn
   WS.forkPingThread conn 30
 
@@ -45,18 +52,21 @@ appImpl mState mNames pendingConn = do
   modifyMVar_ mNames $ \_ -> return names
 
   let client = (name, conn)
-      disconnect = modifyMVar_ mState $ \s -> return $ removeClient client s
+      disconnect = modifyMVar_ mClients $ \s -> return $ removeClient client s
 
   flip finally disconnect $ do
-    modifyMVar_ mState $ \s -> return $ addClient client s
+    modifyMVar_ mClients $ \s -> return $ addClient client s
 
-    talk conn mState client
+    clients <- readMVar mClients
+    _ <- onJoined name (length clients)
+
+    talk conn mClients client
 
 talk :: WS.Connection -> MVar ServerState -> Client -> IO ()
-talk conn state (user, _) = forever $ do
+talk conn _ (user, _) = forever $ do
   msg <- WS.receiveData conn
-  readMVar state >>= broadcast
-    (T.pack (show user) <> ":" <> msg)
+  T.putStrLn ("[Debug] SocketServer:received:" <> T.pack (show $ user) <> ":" <> msg)
+
 
 addClient :: Client -> ServerState -> ServerState
 addClient client clients = client : clients

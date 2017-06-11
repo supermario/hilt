@@ -1,4 +1,4 @@
-module Helm.Storage where
+module Hilt.Storage where
 
 import qualified Data.Text as T
 

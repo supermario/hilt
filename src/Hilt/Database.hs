@@ -3,7 +3,7 @@
 {-|
 Database service
 -}
-module Helm.Database where
+module Hilt.Database where
 
 import           Control.Monad.Logger         (NoLoggingT)
 import           Control.Monad.Trans.Resource (ResourceT)
@@ -20,15 +20,15 @@ data Handle = Handle
 
 -- @TODO Usage sketches/ideas
 
-  -- import Helm.Database
-  -- Helm.Database.exec databaseH query
-  -- let exec = Helm.Database.exec databaseH
+  -- import Hilt.Database
+  -- Hilt.Database.exec databaseH query
+  -- let exec = Hilt.Database.exec databaseH
   -- results :: SomeType <- exec query
 
 
-  -- import Helm.Database as Database
+  -- import Hilt.Database as Database
   -- results :: SomeType <- Database.exec databaseH query
 
 
-  -- import Helm.Database (exec)
+  -- import Hilt.Database (exec)
   -- results :: SomeType <- databaseH.exec query

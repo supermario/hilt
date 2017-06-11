@@ -1,4 +1,4 @@
-module Helm.Logger where
+module Hilt.Logger where
 
 import Prelude hiding (log)
 import qualified Data.Text as T

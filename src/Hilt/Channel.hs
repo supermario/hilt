@@ -1,4 +1,4 @@
-module Helm.Channel where
+module Hilt.Channel where
 
 import qualified Data.Text as T
 
