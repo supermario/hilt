@@ -23,6 +23,8 @@ library
                      , Hilt.SocketServer.Echo
                      , Hilt.SocketServer.Hooked
                      , Hilt.SocketServer.Stm
+                     , Hilt.KeyValueStore
+                     , Hilt.KeyValueStore.Cache
                      , Hilt.PostgresSimple
                      , Hilt.Channel
                      , Hilt.Channel.Stm
@@ -58,6 +60,7 @@ library
                        , resourcet
                        , slave-thread
                        , unagi-chan
+                       , cache
 
   default-language:    Haskell2010
   default-extensions:  OverloadedStrings
