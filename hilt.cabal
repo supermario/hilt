@@ -20,8 +20,6 @@ library
                      , Hilt.Storage.TVar
                      , Hilt.SocketClient
                      , Hilt.SocketServer
-                     , Hilt.SocketServer.Echo
-                     , Hilt.SocketServer.Hooked
                      , Hilt.SocketServer.Stm
                      , Hilt.KeyValueStore
                      , Hilt.KeyValueStore.Cache
