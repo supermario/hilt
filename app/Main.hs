@@ -1,22 +1,23 @@
 module Main where
 
 import           Data.Monoid        ((<>))
-import           Hilt
 import qualified Hilt
-import qualified Hilt.Channel       as Channel
-import qualified Hilt.Channel.Stm   as Channel.Stm
-import qualified Hilt.Logger        as Logger
-import qualified Hilt.Logger.StdOut as Logger.StdOut
+import qualified Hilt.Channel as Channel
+import qualified Hilt.Logger  as Logger
 
 main :: IO ()
-main =
-    Hilt.manage $
-    do loggerH <- Logger.StdOut.load
-       broadcastH <- Channel.Stm.load
-       Hilt.program $
-           do Logger.logDebug loggerH "Handlers initiating..."
-              Channel.worker
-                  broadcastH
-                  (\text ->
-                        Logger.logDebug loggerH $ "ws-broadcast-worker:" <> text)
-              Logger.logDebug loggerH "Up and running..."
+main = Hilt.manage $ do
+
+  logger <- Logger.load
+  chan   <- Channel.load
+
+  -- Now we can write our business logic using our services
+  Hilt.program $ do
+    Logger.debug logger "Starting up!"
+
+    Channel.worker chan (\text -> Logger.debug logger ("Received message: " <> text))
+
+    Channel.write chan "Hello world!"
+
+    -- Or pass services off to some other areas of your app
+    -- someMoreLogic logger chan

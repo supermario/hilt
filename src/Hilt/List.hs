@@ -1,8 +1,8 @@
+module Hilt.List where
+
 import System.Random
 import Data.Array.IO
 import Control.Monad
-
-module Hilt.Ext.List where
 
 -- https://wiki.haskell.org/Random_shuffle
 -- | Randomly shuffle a list

@@ -1,6 +1,5 @@
-{-# LANGUAGE Rank2Types #-}
-
-module Hilt.KeyValueStore where
+module Hilt.Handles.Cache
+  (module Hilt.Handles.Cache) where
 
 import Data.Text (Text)
 

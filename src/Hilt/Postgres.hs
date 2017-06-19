@@ -1,4 +1,7 @@
-module Hilt.Database.Postgres (load, withHandle) where
+module Hilt.Postgres (module Hilt.Postgres, module Hilt.Handles.Postgres) where
+
+import Hilt.Handles.Postgres
+import Control.Monad.Managed (Managed, managed)
 
 {-|
 
@@ -22,33 +25,35 @@ import Database.Persist.Sqlite     (SqliteConf(..), createSqlitePool)
 
 import qualified Database.PostgreSQL.Simple     as SQL
 import qualified Database.PostgreSQL.Simple.URL as SQLU
-
 import qualified Web.Heroku.Persist.Postgresql  as Heroku
 
-import qualified Hilt.Database as Database
+-- For readSqlChar
+import Database.PostgreSQL.Simple.FromField       (returnError, ResultError (..), Field, Conversion)
+import qualified Data.ByteString.Char8 as B
+import Text.Read                                  (readMaybe)
+import Data.Typeable
+
 import qualified Hilt.Config as Config
 
-import Control.Monad.Managed (Managed, managed)
 
-load :: Managed Database.Handle
+load :: Managed Handle
 load = managed withHandle
 
-withHandle :: (Database.Handle -> IO a) -> IO a
+withHandle :: (Handle -> IO a) -> IO a
 withHandle f = do
 
-  -- @ISSUE this should be contained in a config service
+  -- @ISSUE should this be contained in a config service...?
   env       <- Config.lookupEnv "ENV" Config.Development
-
   pool      <- makePool env
   rawConfig <- makePoolRaw
 
   -- @TODO how do implementations log? Should they demand a logger?
   -- putStrLn $ "RawConfig:" ++ rawConfig
 
-  f Database.Handle
-    { Database.exec = flip runSqlPersistMPool pool
-    , Database.execR = runDbRaw rawConfig
-    , Database.execRP = runDbRawP rawConfig
+  f Handle
+    { exec = flip runSqlPersistMPool pool
+    , execR = runDbRaw rawConfig
+    , execRP = runDbRawP rawConfig
     }
 
 
@@ -105,3 +110,33 @@ defaultConnectInfo = SQL.defaultConnectInfo
     , SQL.connectPassword = ""
     , SQL.connectDatabase = "hilt_development"
     }
+
+
+
+-- Utilities
+
+readSqlChar :: (Typeable a, Read a) => Field -> Maybe B.ByteString -> Conversion a
+readSqlChar f bs = case bs of
+  Nothing -> returnError UnexpectedNull f ""
+  Just x  -> case readMaybe $ B.unpack x of
+    Just a  -> pure a
+    Nothing -> returnError ConversionFailed f ""
+
+
+-- Use pg_typeof(derp) to inspect type of record return
+
+-- @TODO - this would be cool? Just work for anything that can be Read?
+--         it does however result in "Overlapping instances for FromField Int"
+--         so maybe we need to add a different typeclass to custom fields? i.e
+--         instance PgSimpleReadable a => FromField a where
+-- {-# LANGUAGE FlexibleInstances #-}
+-- {-# LANGUAGE UndecidableInstances #-}
+-- instance PgCharReadable a => FromField a where
+--   fromField f bs = case bs of
+--     Nothing -> returnError UnexpectedNull f ""
+--     Just x  -> case (readMaybe $ B.unpack x) of
+--       Just a  -> pure a
+--       Nothing -> returnError ConversionFailed f ""
+
+-- @TODO add type check for char column?
+-- if typeOid f /= $(inlineTypoid TI.char) then returnError Incompatible f ""

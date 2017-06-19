@@ -1,9 +1,7 @@
 {-# LANGUAGE Rank2Types #-}
 
-{-|
-Database service
--}
-module Hilt.Database where
+module Hilt.Handles.Postgres
+  (module Hilt.Handles.Postgres) where
 
 import           Control.Monad.Logger         (NoLoggingT)
 import           Control.Monad.Trans.Resource (ResourceT)

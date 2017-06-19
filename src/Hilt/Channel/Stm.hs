@@ -5,7 +5,7 @@ import Control.Concurrent.STM       (STM, atomically)
 import Control.Concurrent.STM.TChan (TChan, newTChan, readTChan, writeTChan)
 import SlaveThread as ST
 
-import qualified Hilt.Channel as Channel
+import qualified Hilt.Handles.Channel as Channel
 
 import Control.Monad.Managed (Managed, managed)
 

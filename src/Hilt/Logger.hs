@@ -1,20 +1,20 @@
-module Hilt.Logger where
+module Hilt.Logger (module Hilt.Logger, module Hilt.Handles.Logger) where
+
+import Hilt.Handles.Logger
+import Control.Monad.Managed (Managed, managed)
 
 import Prelude hiding (log)
+import           Data.Monoid ((<>))
 import qualified Data.Text as T
+import qualified Data.Text.IO as T
 
-data Priority
-  = Debug    -- ^ Debug messages
-  | Info     -- ^ Notable information that requires no immediate action.
-  | Warning  -- ^ Something is probably wrong, and we should investigate.
-  | Error    -- ^ Something is wrong and immediate action is required.
-  deriving (Eq, Ord, Show)
+load :: Managed Handle
+load = managed withHandle
 
-newtype Handle = Handle
-  { log :: Priority -> T.Text -> IO () }
+withHandle :: (Handle -> IO a) -> IO a
+withHandle f =
+  f Handle
+    { log = logImpl }
 
-logDebug, logInfo, logWarning, logError :: Handle -> T.Text -> IO ()
-logDebug   = (`log` Debug)
-logInfo    = (`log` Info)
-logWarning = (`log` Warning)
-logError   = (`log` Error)
+logImpl :: Priority -> T.Text -> IO ()
+logImpl priority text = T.putStrLn $ "[" <> T.pack (show priority) <> "] " <> text
