@@ -1,9 +1,9 @@
+<img align="right" src="https://mario.net.au/images/hilt-logo.svg" width="140">
+
 :warning: Hilt is still in experimental status
 
 
-## Motivation
-
-Hilt aims to provide a usable set of batteries-included services for Haskell, and a way to use them together easily.
+**Hilt aims to provide a set of batteries-included services for Haskell, and a way to use them together easily.**
 
 It is intended to be used at the base level of your Haskell application, providing some structure for your business logic.
 
@@ -25,7 +25,7 @@ main = Hilt.manage $ do
     someMoreLogic logger chan
 ```
 
-Hilt aims to handle the underlying mechanics, threads, async behaviour, safety and service management/cleanup for us.
+Hilt handles the underlying mechanics, threads, async behaviour, safety and service management/cleanup for us.
 
 
 ## Service Types
@@ -61,3 +61,6 @@ For example, if you wanted a storage-backed channel that survives program restar
 * or, use an existing implementation you have and run it under [managed](https://hackage.haskell.org/package/managed) (for which [Hilt.managed](src/Hilt.hs#L85-L91) is just a wrapper), exposing a service interface
 
 Services are very simple, just take a look at [Cache](src/Hilt/Cache.hs) for example, which just wraps the `Data.Cache` lib and provides an interface to it.
+
+
+<sub><sup>Logo by birdie brain from the Noun Project.</sup></sub>
