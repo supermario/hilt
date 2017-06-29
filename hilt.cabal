@@ -15,8 +15,6 @@ library
   exposed-modules:     Hilt
 
                      , Hilt.SocketClient
-                     , Hilt.SocketServer
-                     , Hilt.SocketServer.Stm
                      , Hilt.Channel.Stm
 
                      , Hilt.Config
@@ -25,11 +23,13 @@ library
                      , Hilt.Channel
                      , Hilt.Logger
                      , Hilt.Postgres
+                     , Hilt.SocketServer
 
                      , Hilt.Handles.Cache
                      , Hilt.Handles.Channel
                      , Hilt.Handles.Logger
                      , Hilt.Handles.Postgres
+                     , Hilt.Handles.SocketServer
 
   build-depends:       base >= 4.7 && < 5
                        , random
