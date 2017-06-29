@@ -1,4 +1,10 @@
-module Hilt.Postgres (module Hilt.Postgres, module Hilt.Handles.Postgres) where
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE RankNTypes #-}
+
+module Hilt.Postgres
+  ( module Hilt.Postgres
+  , module Hilt.Handles.Postgres
+  ) where
 
 import Hilt.Handles.Postgres
 import Control.Monad.Managed (Managed, managed)
@@ -17,11 +23,12 @@ The service looks for a DATABASE_URL ENV var containing a postgresql URL on load
 -- TODO
 @
 -}
-import Data.Maybe                  (fromMaybe)
-import Control.Monad.Logger        (runNoLoggingT, runStdoutLoggingT)
-import Database.Persist.Sql        (runSqlPersistMPool, ConnectionPool)
-import Database.Persist.Postgresql (ConnectionString, createPostgresqlPool, pgConnStr)
-import Database.Persist.Sqlite     (SqliteConf(..), createSqlitePool)
+import Data.Maybe                          (fromMaybe)
+import Control.Monad.Logger                (runNoLoggingT, runStdoutLoggingT)
+import qualified Database.Persist.Sql as P (runSqlPersistMPool, ConnectionPool, insert)
+import Database.Persist.Postgresql         (SqlBackend, ConnectionString, createPostgresqlPool, pgConnStr)
+import Database.Persist.Sqlite             (SqliteConf(..), createSqlitePool)
+import Database.Persist                    (Key, PersistEntityBackend, PersistEntity)
 
 import qualified Database.PostgreSQL.Simple     as SQL
 import qualified Database.PostgreSQL.Simple.URL as SQLU
@@ -51,7 +58,7 @@ withHandle f = do
   -- putStrLn $ "RawConfig:" ++ rawConfig
 
   f Handle
-    { exec = flip runSqlPersistMPool pool
+    { exec = flip P.runSqlPersistMPool pool
     , execR = runDbRaw rawConfig
     , execRP = runDbRawP rawConfig
     }
@@ -68,11 +75,16 @@ runDbRawP creds query p = do
   conn <- SQL.connect creds
   SQL.query conn query p
 
+-- Utilities
+
+insert :: forall a . (PersistEntityBackend a ~ SqlBackend, PersistEntity a)
+  => Handle -> a -> IO (Key a)
+insert handle element = exec handle $ P.insert element
 
 
 -- Persistent Pool
 
-makePool :: Config.Environment -> IO ConnectionPool
+makePool :: Config.Environment -> IO P.ConnectionPool
 makePool Config.Test = runNoLoggingT $ createSqlitePool (sqlDatabase $ sqliteConf Config.Test) (envPoolSize Config.Test)
 makePool e = do
   -- Development / Staging / Production envs use Postgres and DATABASE_URL

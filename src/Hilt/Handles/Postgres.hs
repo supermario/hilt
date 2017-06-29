@@ -14,6 +14,9 @@ data Handle = Handle
   { exec   :: forall a . ReaderT SqlBackend (NoLoggingT (ResourceT IO)) a -> IO a
   , execR  :: forall a . (SQL.FromRow a) => SQL.Query -> IO [a]
   , execRP :: forall a b . (SQL.FromRow a, SQL.ToRow b) => SQL.Query -> b -> IO [a]
+  -- @TODO fix naming to execRaw / execRawParam
+  -- @TODO add seperate implementations for execRawParam and execRawParams
+  -- with the former solving the (x,1) issue and the latter handling the tuples
   }
 
 -- @TODO Usage sketches/ideas
