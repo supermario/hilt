@@ -19,6 +19,7 @@ library
 
                      , Hilt.Config
                      , Hilt.JSON
+                     , Hilt.Server
 
                      , Hilt.Cache
                      , Hilt.Channel
@@ -33,35 +34,38 @@ library
                      , Hilt.Handles.SocketServer
 
   build-depends:       base >= 4.7 && < 5
-                       , random
                        , aeson
-                       , http-dispatch
                        , bytestring
-                       , text
-                       , websockets
-                       , mtl
-                       , network
-                       , wuss
-                       , transformers
-                       , stm
-                       , managed
-                       , postgresql-simple
-                       , monad-logger
-                       , persistent
-                       , persistent-sqlite
-                       , persistent-postgresql
-                       , postgresql-simple
-                       , postgresql-simple-url
-                       , wai-extra
+                       , cache
                        , heroku
                        , heroku-persistent
-                       , wai
+                       , http-dispatch
+                       , http-types
+                       , managed
                        , monad-control
+                       , monad-logger
+                       , mtl
+                       , network
+                       , persistent
+                       , persistent-postgresql
+                       , persistent-sqlite
+                       , postgresql-simple
+                       , postgresql-simple
+                       , postgresql-simple-url
+                       , random
                        , resourcet
                        , slave-thread
-                       , unagi-chan
-                       , cache
+                       , stm
+                       , text
                        , time
+                       , transformers
+                       , unagi-chan
+                       , wai
+                       , wai-extra
+                       , wai-websockets
+                       , warp
+                       , websockets
+                       , wuss
 
   default-language:    Haskell2010
   default-extensions:  OverloadedStrings
