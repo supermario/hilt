@@ -24,57 +24,68 @@ loadDefault onJoined onReceive = managed $ withHandle onJoined onReceive
 withHandle :: OnJoined -> OnReceive -> (Handle -> IO a) -> IO a
 withHandle onJoined onReceive f = do
   mClients <- newTVarIO []
-  mNames   <- newTVarIO [1..]
+  mClientIds <- newTVarIO [1..]
 
   f Handle
     { send      = sendImpl mClients
     , broadcast = broadcastImpl mClients
-    , app       = appImpl mClients mNames onJoined onReceive
+    , app       = appImpl mClients mClientIds onJoined onReceive
     }
 
+loadRaw :: OnJoined -> OnReceive -> IO Handle
+loadRaw onJoined onReceive = do
+  mClients <- newTVarIO []
+  mClientIds   <- newTVarIO [1..]
 
-type Name = Int
-type Names = [Int]
+  return Handle
+    { send      = sendImpl mClients
+    , broadcast = broadcastImpl mClients
+    , app       = appImpl mClients mClientIds onJoined onReceive
+    }
 
-type Client = (Name, WS.Connection)
+type ClientId = Int
+type ClientIds = [Int]
+
+type Client = (ClientId, WS.Connection)
 type Clients = [Client]
 
 type TClients = TVar Clients
-type TNames = TVar Names
+type TClientIds = TVar ClientIds
 
 -- OnJoined = totalClients -> IO (Maybe (response message))
-type OnJoined = Int -> IO (Maybe T.Text)
+type OnJoined = ClientId -> Int -> IO (Maybe T.Text)
 -- OnReceive = receivedMessage -> -> IO ()
-type OnReceive = T.Text -> IO ()
+type OnReceive = ClientId -> T.Text -> IO ()
 
-sendImpl :: TClients -> Name -> T.Text -> IO ()
-sendImpl mClients name message = do
+sendImpl :: TClients -> ClientId -> T.Text -> IO ()
+sendImpl mClients clientId message = do
+  T.putStrLn message
   clients <- atomically $ readTVar mClients
-  send_ clients name message
+  send_ clients clientId message
 
 broadcastImpl :: TClients -> T.Text -> IO ()
 broadcastImpl mClients message = do
   clients <- atomically $ readTVar mClients
   broadcast_ clients message
 
-appImpl :: TClients -> TNames -> OnJoined -> OnReceive -> WS.ServerApp
-appImpl mClients mNames onJoined onReceive pendingConn = do
+appImpl :: TClients -> TClientIds -> OnJoined -> OnReceive -> WS.ServerApp
+appImpl mClients mClientIds onJoined onReceive pendingConn = do
   conn <- WS.acceptRequest pendingConn
   WS.forkPingThread conn 30
 
-  name <- atomically $ do
-    names <- readTVar mNames
-    let n:remaining = names
-    writeTVar mNames remaining
-    return n
+  clientId <- atomically $ do
+    clientIds <- readTVar mClientIds
+    let next:remaining = clientIds
+    writeTVar mClientIds remaining
+    return next
 
-  let client = (name, conn)
+  let client = (clientId, conn)
       disconnect = do
         atomically $ do
           clients <- readTVar mClients
           writeTVar mClients $ removeClient client clients
 
-        T.putStrLn ("[Debug] SocketServer:disconnect:" <> T.pack (show name))
+        T.putStrLn ("[Debug] SocketServer:disconnect:" <> T.pack (show clientId))
         return ()
 
   flip finally disconnect $ do
@@ -83,18 +94,21 @@ appImpl mClients mNames onJoined onReceive pendingConn = do
       writeTVar mClients $ addClient client clients
       return $ length clients
 
-    initText <- onJoined clientCount
+    initText <- onJoined clientId clientCount
     case initText of
-      Just text -> sendImpl mClients name text
-      Nothing -> return ()
+      Just text -> sendImpl mClients clientId text
+      Nothing -> do
+        -- @TODO PROBEL!M!
+        putStrLn "[WARNING] No init message for new client was provided"
+        return ()
 
     talk onReceive conn mClients client
 
 talk :: OnReceive -> WS.Connection -> TClients -> Client -> IO ()
-talk onReceive conn _ (user, _) = forever $ do
+talk onReceive conn _ (clientId, _) = forever $ do
   msg <- WS.receiveData conn
-  T.putStrLn ("[Debug] SocketServer:received:" <> T.pack (show user) <> ":" <> msg)
-  onReceive msg
+  T.putStrLn ("[Debug] SocketServer:received:" <> T.pack (show clientId) <> ":" <> msg)
+  onReceive clientId msg
 
 addClient :: Client -> Clients -> Clients
 addClient client clients = client : clients
@@ -102,12 +116,12 @@ addClient client clients = client : clients
 removeClient :: Client -> Clients -> Clients
 removeClient client = filter ((/= fst client) . fst)
 
-findClient :: Clients -> Name -> Maybe Client
-findClient clients name = find ((== name) . fst) clients
+findClient :: Clients -> ClientId -> Maybe Client
+findClient clients clientId = find ((== clientId) . fst) clients
 
-send_ :: Clients -> Name -> T.Text -> IO ()
-send_ clients name text =
-  case findClient clients name of
+send_ :: Clients -> ClientId -> T.Text -> IO ()
+send_ clients clientId text =
+  case findClient clients clientId of
     Just (_, conn) -> WS.sendTextData conn text
     Nothing        -> return ()
 
