@@ -59,7 +59,6 @@ type OnReceive = ClientId -> T.Text -> IO ()
 
 sendImpl :: TClients -> ClientId -> T.Text -> IO ()
 sendImpl mClients clientId message = do
-  T.putStrLn message
   clients <- atomically $ readTVar mClients
   send_ clients clientId message
 
