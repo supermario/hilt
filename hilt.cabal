@@ -74,6 +74,7 @@ executable hilt-example
   main-is: Main.hs
   build-depends:       base
                      , hilt
+                     , text-show
 
   hs-source-dirs:      app/
   default-language:    Haskell2010
