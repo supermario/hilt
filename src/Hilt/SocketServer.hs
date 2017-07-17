@@ -84,7 +84,7 @@ appImpl mClients mClientIds onJoined onReceive pendingConn = do
           clients <- readTVar mClients
           writeTVar mClients $ removeClient client clients
 
-        T.putStrLn ("[Debug] SocketServer:disconnect:" <> T.pack (show clientId))
+        T.putStrLn ("[websocket:disconnect] " <> T.pack (show clientId))
         return ()
 
   flip finally disconnect $ do
@@ -106,7 +106,7 @@ appImpl mClients mClientIds onJoined onReceive pendingConn = do
 talk :: OnReceive -> WS.Connection -> TClients -> Client -> IO ()
 talk onReceive conn _ (clientId, _) = forever $ do
   msg <- WS.receiveData conn
-  T.putStrLn ("[Debug] SocketServer:received:" <> T.pack (show clientId) <> ":" <> msg)
+  T.putStrLn ("[websocket:received] " <> T.pack (show clientId) <> ":" <> msg)
   onReceive clientId msg
 
 addClient :: Client -> Clients -> Clients
@@ -126,5 +126,5 @@ send_ clients clientId text =
 
 broadcast_ :: Clients -> T.Text -> IO ()
 broadcast_ clients message = do
-  T.putStrLn ("[Debug] SocketServer:broadcast:" <> T.pack (show $ length clients) <> ":" <> message)
+  T.putStrLn ("[websocket:broadcast] " <> T.pack (show $ length clients) <> ":" <> message)
   forM_ clients $ \(_, conn) -> WS.sendTextData conn message
