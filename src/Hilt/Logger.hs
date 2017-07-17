@@ -17,4 +17,4 @@ withHandle f =
     { log = logImpl }
 
 logImpl :: Priority -> T.Text -> IO ()
-logImpl priority text = T.putStrLn $ "[" <> T.pack (show priority) <> "] " <> text
+logImpl priority text = T.putStrLn $ "[" <> T.toLower (T.pack (show priority)) <> "] " <> text
