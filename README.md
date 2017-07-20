@@ -201,7 +201,7 @@ Hilt aims to have a bootstrap script eventually. It is not published to Hackage 
   ```
   - location:
       git: https://github.com/supermario/hilt.git
-      commit: 5822314
+      commit: ae4a54f9fde56015dce8de83cd0935e5e5776eeb
   ```
   Stack doesn't support a `master` target, so you'll need to pin the latest SHA until Hilt is released.
 
