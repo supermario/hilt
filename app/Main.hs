@@ -18,6 +18,16 @@ cd hilt && stack build && stack exec hilt-example
 # In another terminal window
 curl -i -N -H "Connection: Upgrade" -H "Upgrade: websocket" -H "Sec-WebSocket-Key: SGVsbG8sIHdvcmxkIQ==" localhost:8081
 ```
+
+The Hilt.Postgres service is not demonstrated as it needs an existing Postgres DB in the DATABASE_URL ENV var,
+and table to query. The addition is simple however if you want it:
+
+  -- Add the db service next to the other services
+  db <- Hilt.Postgres.load
+
+  -- Use the handle within your program
+  Hilt.Postgres.query db "SELECT * FROM myTable WHERE x = ?" ["1"]
+
 -}
 main :: IO ()
 main = Hilt.manage $ do
