@@ -1,16 +1,24 @@
 <img align="right" src="https://mario.net.au/images/hilt-logo.svg" width="140">
 
-:warning: Hilt is still highly experimental and changing frequently.
-
-
-**Hilt provides a set of batteries-included services for Haskell, and a way to use them together easily.**
+**Hilt provides a set of opinionated batteries-included services for Haskell, and a way to use them together easily, allowing you to get the handle of Haskell.**
 
 It is intended to be used at the base level of your Haskell application, providing some structure for your business logic.
 
+:warning: Hilt is still highly experimental and changing frequently.
 
-## How it works
+## Table of Contents
 
-An example app using the logging and channel services together. It simply writes any messages written to the channel, which the worker logs.
+- [Example](#example)
+- [Services](#service)
+- [Helpers](#helpers)
+- [Setup](#setup)
+- [Custom Services](#custom-services)
+- [Implementation Details](#implementation-details)
+
+
+## Example
+
+A basic example using the `Logger` and `Channel` services together. It simply writes any messages written to the channel, which the worker logs.
 
 ```haskell
 main = Hilt.manage $ do
@@ -31,7 +39,7 @@ Hilt handles the underlying mechanics, threads, async behaviour, safety and serv
 
 For a full, runnable example, see [app/Main.hs](app/Main.hs).
 
-## Overview
+## Services
 
 Hilt currently provides the following types of services:
 
@@ -179,9 +187,9 @@ Runs a Wai app on Warp with the provided `Websocket` handle.
 There will be `runHttp` and `runWebsocketAndHttp` in future.
 
 
-# Setup
+## Setup
 
-Hilt aims to have a bootstrap script eventually. Currently it requires the following steps on an existing Haskell stack project.
+Hilt aims to have a bootstrap script eventually. It is not published to Hackage yet, so currently it requires the following steps on an existing Haskell stack project.
 
 - Create a new project with `stack`, or adjust the `main` of an existing one
 - In your `project.cabal` under the `executable` section
@@ -194,7 +202,6 @@ Hilt aims to have a bootstrap script eventually. Currently it requires the follo
       commit: b4a64be
   ```
   Stack doesn't support a `master` target, so you'll need to pin the latest SHA until Hilt is released.
-
 
 
 ## Custom Services
@@ -211,7 +218,7 @@ Services are very simple, take a look at [Cache](src/Hilt/Cache.hs) for example,
 
 
 
-## Details
+## Implementation Details
 
 Hilt is an implementation of the [service pattern](https://www.schoolofhaskell.com/user/meiersi/the-service-pattern).
 
