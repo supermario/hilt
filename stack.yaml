@@ -6,7 +6,6 @@ packages:
 extra-deps:
 - heroku-0.1.2.3
 - heroku-persistent-0.2.0
-
 - postgresql-simple-url-0.1.0.1
 - unagi-chan-0.4.0.0
 
