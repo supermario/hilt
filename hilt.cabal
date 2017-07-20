@@ -39,7 +39,7 @@ library
                        , cache
                        , heroku
                        , heroku-persistent
-                       , http-dispatch
+
                        , http-types
                        , managed
                        , monad-control

@@ -46,6 +46,7 @@ import qualified Hilt.Config as Config
 load :: Managed Handle
 load = managed withHandle
 
+
 withHandle :: (Handle -> IO a) -> IO a
 withHandle f = do
 
@@ -53,33 +54,24 @@ withHandle f = do
   env       <- Config.lookupEnv "ENV" Config.Development
   pool      <- makePool env
   rawConfig <- makePoolRaw
+  conn      <- SQL.connect rawConfig
 
   -- @TODO how do implementations log? Should they demand a logger?
   -- putStrLn $ "RawConfig:" ++ rawConfig
 
   f Handle
-    { exec = flip P.runSqlPersistMPool pool
-    , execR = runDbRaw rawConfig
-    , execRP = runDbRawP rawConfig
+    { queryP = flip P.runSqlPersistMPool pool
+    , query_ = SQL.query_ conn
+    , query = SQL.query conn
+    , dbInfo = dbInfoImpl conn
     }
 
-
-runDbRaw :: (SQL.FromRow a) => SQL.ConnectInfo -> SQL.Query -> IO [a]
-runDbRaw creds query = do
-  conn <- SQL.connect creds
-  SQL.query_ conn query
-
-
-runDbRawP :: (SQL.FromRow a, SQL.ToRow b) => SQL.ConnectInfo -> SQL.Query -> b -> IO [a]
-runDbRawP creds query p = do
-  conn <- SQL.connect creds
-  SQL.query conn query p
 
 -- Utilities
 
 insert :: forall a . (PersistEntityBackend a ~ SqlBackend, PersistEntity a)
   => Handle -> a -> IO (Key a)
-insert handle element = exec handle $ P.insert element
+insert handle element = queryP handle $ P.insert element
 
 
 -- Persistent Pool
@@ -91,16 +83,19 @@ makePool e = do
   connStr <- lookupDatabaseUrl
   runStdoutLoggingT $ createPostgresqlPool connStr (envPoolSize e)
 
+
 -- For staging/prod
 -- Fetch postgres formatted DATABASE_URL ENV var (ala Heroku) and return Persistant ConnectionString
 lookupDatabaseUrl :: IO ConnectionString
 lookupDatabaseUrl = pgConnStr <$> Heroku.postgresConf 1 -- The 1 is dropped as we only pull out pgConnStr from the ADT
+
 
 envPoolSize :: Config.Environment -> Int
 envPoolSize Config.Development = 1
 envPoolSize Config.Test        = 1
 envPoolSize Config.Staging     = 1
 envPoolSize Config.Production  = 8
+
 
 sqliteConf :: Config.Environment -> SqliteConf
 sqliteConf Config.Test = SqliteConf ":memory:" 1
@@ -122,7 +117,6 @@ defaultConnectInfo = SQL.defaultConnectInfo
     , SQL.connectPassword = ""
     , SQL.connectDatabase = "hilt_development"
     }
-
 
 
 -- Utilities

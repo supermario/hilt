@@ -9,14 +9,25 @@ import           Control.Monad.Reader         (ReaderT)
 import           Database.Persist.Sql
 import qualified Database.PostgreSQL.Simple as SQL
 
+
+type DbInfo = [TableInfo]
+
+data TableInfo = TableInfo
+  { tableName :: String
+  , fields :: [FieldInfo]
+  } deriving (Show)
+
+data FieldInfo = FieldInfo
+  { fieldName :: String
+  , fieldType :: String
+  , fieldNullable :: Bool
+  } deriving (Show)
+
 -- @ISSUE Handle signature is specific for Persistent/PostgreSQL.Simple
 data Handle = Handle
-  { exec   :: forall a . ReaderT SqlBackend (NoLoggingT (ResourceT IO)) a -> IO a
-  , execR  :: forall a . (SQL.FromRow a) => SQL.Query -> IO [a]
-  , execRP :: forall a b . (SQL.FromRow a, SQL.ToRow b) => SQL.Query -> b -> IO [a]
-  -- @TODO fix naming to execRaw / execRawParam
-  -- @TODO add seperate implementations for execRawParam and execRawParams
-  -- with the former solving the (x,1) issue and the latter handling the tuples
+  { queryP :: forall a . ReaderT SqlBackend (NoLoggingT (ResourceT IO)) a -> IO a
+  , query_ :: forall a . (SQL.FromRow a) => SQL.Query -> IO [a]
+  , query  :: forall a b . (SQL.FromRow a, SQL.ToRow b) => SQL.Query -> b -> IO [a]
   }
 
 -- @TODO Usage sketches/ideas
