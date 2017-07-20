@@ -95,7 +95,7 @@ main = Hilt.manage $ do
 
   websocket <- Websocket.load onJoined onReceive
 
-  Hilt.program $ do  
+  Hilt.program $ do
     -- Start a HTTP server on port 8081
     Hilt.Server.runWebsocket websocket
 ```
@@ -201,7 +201,7 @@ Hilt aims to have a bootstrap script eventually. It is not published to Hackage 
   ```
   - location:
       git: https://github.com/supermario/hilt.git
-      commit: ae4a54f9fde56015dce8de83cd0935e5e5776eeb
+      commit: a2957e7e6194079f0a395bb30b6e36422a597a4d
   ```
   Stack doesn't support a `master` target, so you'll need to pin the latest SHA until Hilt is released.
 
