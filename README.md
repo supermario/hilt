@@ -9,7 +9,7 @@ It is intended to be used at the base level of your Haskell application, providi
 ## Table of Contents
 
 - [Example](#example)
-- [Services](#service)
+- [Services](#services)
 - [Helpers](#helpers)
 - [Setup](#setup)
 - [Custom Services](#custom-services)
@@ -130,6 +130,8 @@ Create a handle with `db <- Postgres.load` and then:
 | **queryMaybe** (TBC) | `events :: Maybe [Event] <- Postgres.queryMaybe db "SELECT * FROM events"` | Future idea; execute a postgres query and decode the results to the specified type. |
 
 The interface is rather raw currently, simply exposing certain parts of the underlying libraries to get a feel for the right approach.
+
+Also connection pooling currently only works for the `queryP` function.
 
 In future they might tend more towards something like `queryMaybe` interface described.
 
