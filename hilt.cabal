@@ -52,6 +52,7 @@ library
                        , postgresql-simple
                        , postgresql-simple
                        , postgresql-simple-url
+                       , pretty-show
                        , random
                        , resourcet
                        , slave-thread

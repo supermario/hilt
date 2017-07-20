@@ -1,11 +1,15 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE QuasiQuotes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Hilt.Postgres
   ( module Hilt.Postgres
   , module Hilt.Handles.Postgres
   ) where
 
+import Text.Show.Pretty (ppShow)
 import Hilt.Handles.Postgres
 import Control.Monad.Managed (Managed, managed)
 
@@ -32,6 +36,7 @@ import Database.Persist                    (Key, PersistEntityBackend, PersistEn
 
 import qualified Database.PostgreSQL.Simple     as SQL
 import qualified Database.PostgreSQL.Simple.URL as SQLU
+import Database.PostgreSQL.Simple.SqlQQ         (sql)
 import qualified Web.Heroku.Persist.Postgresql  as Heroku
 
 -- For readSqlChar
@@ -145,3 +150,50 @@ readSqlChar f bs = case bs of
 
 -- @TODO add type check for char column?
 -- if typeOid f /= $(inlineTypoid TI.char) then returnError Incompatible f ""
+
+
+dbInfoImpl :: SQL.Connection -> IO DbInfo
+dbInfoImpl conn = do
+  tables <- singleColumnString conn dbInfoQuery
+  mapM (getTableInfo conn) tables
+
+
+pp :: forall a. Show a => a -> IO ()
+pp a = putStrLn $ ppShow a
+
+
+getTableInfo :: SQL.Connection -> String -> IO TableInfo
+getTableInfo conn table = do
+  tableInfosRaw :: [(String,String,Bool)] <- SQL.query conn tableInfoQuery [table]
+
+  let fields = fmap (\(fieldName, fieldType, fieldNullable) -> FieldInfo{..}) tableInfosRaw
+
+  return $ TableInfo table fields
+
+
+singleColumnString :: SQL.Connection -> SQL.Query -> IO [String]
+singleColumnString conn q = do
+  column :: [[String]] <- SQL.query_ conn q
+  return $ filter (/= "") $ fmap (\c ->
+    case c of
+      [] -> ""
+      (x:_) -> x
+    ) column
+
+
+dbInfoQuery :: SQL.Query
+dbInfoQuery = [sql|
+  SELECT tablename
+  FROM pg_tables
+  WHERE schemaname = ANY (current_schemas(false))
+|]
+
+
+tableInfoQuery :: SQL.Query
+tableInfoQuery = [sql|
+  SELECT a.attname, format_type(a.atttypid, a.atttypmod), not a.attnotnull
+    FROM pg_attribute a
+   WHERE a.attrelid = ?::regclass
+     AND a.attnum > 0 AND NOT a.attisdropped
+   ORDER BY a.attnum
+|]

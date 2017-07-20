@@ -28,6 +28,7 @@ data Handle = Handle
   { queryP :: forall a . ReaderT SqlBackend (NoLoggingT (ResourceT IO)) a -> IO a
   , query_ :: forall a . (SQL.FromRow a) => SQL.Query -> IO [a]
   , query  :: forall a b . (SQL.FromRow a, SQL.ToRow b) => SQL.Query -> b -> IO [a]
+  , dbInfo :: IO DbInfo
   }
 
 -- @TODO Usage sketches/ideas
