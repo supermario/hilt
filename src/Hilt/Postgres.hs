@@ -63,7 +63,6 @@ withHandle f = do
     { queryP = flip P.runSqlPersistMPool pool
     , query_ = SQL.query_ conn
     , query = SQL.query conn
-    , dbInfo = dbInfoImpl conn
     }
 
 
