@@ -3,6 +3,7 @@
 module Hilt.Handles.Postgres
   (module Hilt.Handles.Postgres) where
 
+import           Data.Int (Int64)
 import           Control.Monad.Logger         (NoLoggingT)
 import           Control.Monad.Trans.Resource (ResourceT)
 import           Control.Monad.Reader         (ReaderT)
@@ -28,6 +29,7 @@ data Handle = Handle
   { queryP :: forall a . ReaderT SqlBackend (NoLoggingT (ResourceT IO)) a -> IO a
   , query_ :: forall a . (SQL.FromRow a) => SQL.Query -> IO [a]
   , query  :: forall a b . (SQL.FromRow a, SQL.ToRow b) => SQL.Query -> b -> IO [a]
+  , execute :: forall b . (SQL.ToRow b) => SQL.Query -> b -> IO Int64
   , dbInfo :: IO DbInfo
   }
 

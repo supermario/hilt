@@ -126,6 +126,7 @@ Create a handle with `db <- Postgres.load` and then:
 | -          | -                                      | -           |
 | **query_** | `events :: [Event] <- Postgres.query_ db "SELECT * FROM events"` | Run a [postgresql-simple](https://hackage.haskell.org/package/postgresql-simple/docs/Database-PostgreSQL-Simple.html) query and decode the results to the specified type. |
 | **query** | `events :: [Event] <- Postgres.query db "SELECT * FROM ?" ["events"]` | Run a paramaterised [postgresql-simple](https://hackage.haskell.org/package/postgresql-simple/docs/Database-PostgreSQL-Simple.html) query and decode the results to the specified type. Params interpolate into `?` within the query. Use a singleton array `[a]` for a single param and tuples `(a,b,...)` for multiple params |
+| **execute** | `Postgres.execute db "DROP TABLE events" ()` | Run a [postgresql-simple](https://hackage.haskell.org/package/postgresql-simple/docs/Database-PostgreSQL-Simple.html) query that returns no results. Params interpolate into `?` within the query. Use a singleton array `[a]` for a single param and tuples `(a,b,...)` for multiple params or unit `()` for none |
 | **queryP**   | `events :: [Event] <- Postgres.exec db $ selectList [] []` | Runs a persistent query. See the [persistent guide](http://www.yesodweb.com/book/persistent). |
 | **queryMaybe** (TBC) | `events :: Maybe [Event] <- Postgres.queryMaybe db "SELECT * FROM events"` | Future idea; execute a postgres query and decode the results to the specified type. |
 
