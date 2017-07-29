@@ -8,12 +8,33 @@ It is intended to be used at the base level of your Haskell application, providi
 
 ## Table of Contents
 
+- [Setup](#setup)
 - [Example](#example)
 - [Services](#services)
 - [Helpers](#helpers)
-- [Setup](#setup)
 - [Custom Services](#custom-services)
 - [Implementation Details](#implementation-details)
+
+
+
+## Setup
+
+- Create a new project with `stack new hilt-test new-template`, or adjust the `main` of an existing one
+- In your `project.cabal` under the `executable` section
+  - Add `hilt` to the `build-depends` list
+  - Add `default-extensions: OverloadedStrings`
+- In your `stack.yml` either add or merge the following settings:
+  ```yaml
+  packages:
+  - location:
+      git: https://github.com/supermario/hilt.git
+      commit: 36a674de882acb770a8594a9e3d94104d0b9d274 # Current Master Sha
+
+  extra-deps:
+  - heroku-0.1.2.3
+  - heroku-persistent-0.2.0
+  ```
+  Stack doesn't support a `master` target, so you'll need to pin the latest SHA until Hilt is released.
 
 
 ## Example
@@ -188,28 +209,6 @@ Generally you should only have one worker per channel, as messages can only be r
 Runs a Wai app on Warp with the provided `Websocket` handle.
 
 There will be `runHttp` and `runWebsocketAndHttp` in future.
-
-
-## Setup
-
-Hilt aims to have a bootstrap script eventually. It is not published to Hackage yet, so currently it requires the following steps on an existing Haskell stack project.
-
-- Create a new project with `stack new hilt-test new-template`, or adjust the `main` of an existing one
-- In your `project.cabal` under the `executable` section
-  - Add `hilt` to the `build-depends` list
-  - Add `default-extensions: OverloadedStrings`
-- In your `stack.yml` either add or merge the following settings:
-  ```
-  packages:
-  - location:
-      git: https://github.com/supermario/hilt.git
-      commit: a2957e7e6194079f0a395bb30b6e36422a597a4d
-
-  extra-deps:
-  - heroku-0.1.2.3
-  - heroku-persistent-0.2.0
-  ```
-  Stack doesn't support a `master` target, so you'll need to pin the latest SHA until Hilt is released.
 
 
 ## Custom Services

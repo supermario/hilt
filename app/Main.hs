@@ -3,10 +3,12 @@ module Main where
 import           TextShow
 import           Data.Monoid        ((<>))
 import qualified Hilt
-import qualified Hilt.Server
+import qualified Hilt.Server       as Server
 import qualified Hilt.Channel      as Channel
 import qualified Hilt.Logger       as Logger
 import qualified Hilt.SocketServer as Websocket
+import           Network.Wai        (responseLBS)
+import           Network.HTTP.Types (status200)
 
 {-
 To run this sample locally:
@@ -46,6 +48,11 @@ main = Hilt.manage $ do
       Logger.debug logger $ showt clientId <> " said " <> showt text
       Channel.write chan text
 
+
+  let application _ respond = respond $
+          responseLBS status200 [("Content-Type", "text/plain")] "Hello World"
+
+
   websocket <- Websocket.load onJoined onReceive
 
 
@@ -64,4 +71,4 @@ main = Hilt.manage $ do
     -- Or pass services off to some other areas of your app
     -- someMoreLogic logger chan
 
-    Hilt.Server.runWebsocket websocket
+    Server.runHttp application
