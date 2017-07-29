@@ -25,5 +25,13 @@ runWebsocket socketHandle = do
 
   return ()
 
--- runHttp @TODO
+-- runHttp :: IO ()
+runHttp waiApp = do
+    port <- Config.lookupEnv "PORT" 7070
+
+    _ <- forkIO $ Warp.run port waiApp
+
+    return ()
+
+
 -- runWebsocketAndHttp @TODO
