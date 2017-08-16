@@ -28,7 +28,7 @@ It is intended to be used at the base level of your Haskell application, providi
   packages:
   - location:
       git: https://github.com/supermario/hilt.git
-      commit: 36a674de882acb770a8594a9e3d94104d0b9d274 # Current Master Sha
+      commit: 419c4cd26f9888999d1ee7cdd7561473a1e0272c # Current Master Sha
 
   extra-deps:
   - heroku-0.1.2.3
