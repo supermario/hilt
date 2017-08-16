@@ -73,6 +73,7 @@ main = Hilt.manage $ do
 module Hilt
   ( -- * Running
     manage
+  , once
   , program
   , manageTest)
   where
@@ -82,22 +83,38 @@ import Control.Monad         (forever)
 import Control.Monad.Managed (Managed, MonadIO, liftIO, runManaged)
 import System.IO (hSetBuffering, hSetEncoding, BufferMode(..), stdout, utf8)
 
+
 -- | Wrapper for runManaged that than runs forever. See example above for usage.
 manage :: forall a. Managed a -> IO ()
 manage things =
   runManaged $ do
-    -- Force LineBuffering for consistent output behavior
-    liftIO $ hSetBuffering stdout LineBuffering
-    liftIO $ hSetEncoding stdout utf8
-    liftIO $ putStrLn "Starting under Hilt management..."
+    liftIO stdoutSetup
     _ <- things
-    -- wait until the the process is killed
+    -- Wait until the the process is killed
     forever $ liftIO $ threadDelay 100000
+
+
+-- | Wrapper for runManaged that than runs once. See example above for usage.
+once :: forall a. Managed a -> IO ()
+once things =
+  runManaged $ do
+    liftIO stdoutSetup
+    _ <- things
+    return ()
+
+
+-- | Force LineBuffering for consistent output behavior
+stdoutSetup :: IO ()
+stdoutSetup = do
+  hSetBuffering stdout LineBuffering
+  hSetEncoding stdout utf8
+
 
 -- | TBC, for testing.
 manageTest :: Managed () -> IO ()
 manageTest = runManaged
 
--- | Utility function re-exporting liftIO to avoid Control.Monad.Managed import in Hilt client code.
+
+-- | Utility function re-exporting liftIO to avoid Control.Monad.Managed dependency in Hilt client code.
 program :: MonadIO m => IO a -> m a
 program = liftIO

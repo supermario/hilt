@@ -116,7 +116,7 @@ makePoolRaw = do
   connStr <- Config.lookupEnvString "DATABASE_URL" ""
   return $ fromMaybe defaultConnectInfo (SQLU.parseDatabaseUrl connStr)
 
--- @ISSUE read default from someone controllable by user?
+-- @ISSUE read default from somewhere controllable by user?
 defaultConnectInfo :: SQL.ConnectInfo
 defaultConnectInfo = SQL.defaultConnectInfo
     { SQL.connectUser = "postgres"
