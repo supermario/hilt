@@ -8,33 +8,17 @@ It is intended to be used at the base level of your Haskell application, providi
 
 ## Table of Contents
 
-- [Setup](#setup)
 - [Example](#example)
+- [Setup](#setup)
 - [Services](#services)
+  - [Logger](#Logger)
+  - [Websocket](#Websocket)
+  - [Postgres](#Postgres)
+  - [Channel](#Channel)
+  - [Cache](#Cache)
 - [Helpers](#helpers)
 - [Custom Services](#custom-services)
 - [Implementation Details](#implementation-details)
-
-
-
-## Setup
-
-- Create a new project with `stack new hilt-test new-template`, or adjust the `main` of an existing one
-- In your `project.cabal` under the `executable` section
-  - Add `hilt` to the `build-depends` list
-  - Add `default-extensions: OverloadedStrings`
-- In your `stack.yml` either add or merge the following settings:
-  ```yaml
-  packages:
-  - location:
-      git: https://github.com/supermario/hilt.git
-      commit: 419c4cd26f9888999d1ee7cdd7561473a1e0272c # Current Master Sha
-
-  extra-deps:
-  - heroku-0.1.2.3
-  - heroku-persistent-0.2.0
-  ```
-  Stack doesn't support a `master` target, so you'll need to pin the latest SHA until Hilt is released.
 
 
 ## Example
@@ -59,6 +43,29 @@ main = Hilt.manage $ do
 Hilt handles the underlying mechanics, threads, async behaviour, safety and service management/cleanup for us.
 
 For a full, runnable example, see [app/Main.hs](app/Main.hs).
+
+
+## Setup
+
+With the Haskell tool [`stack`](https://github.com/commercialhaskell/stack) installed;
+
+- Create a new project with `stack new hilt-test new-template`, or adjust the `main` of an existing one
+- In your `project.cabal` under the `executable` section
+  - Add `hilt` to the `build-depends` list
+  - Add `default-extensions: OverloadedStrings`
+- In your `stack.yml` either add or merge the following settings:
+  ```yaml
+  packages:
+  - location:
+      git: https://github.com/supermario/hilt.git
+      commit: 419c4cd26f9888999d1ee7cdd7561473a1e0272c # Current Master Sha
+
+  extra-deps:
+  - heroku-0.1.2.3
+  - heroku-persistent-0.2.0
+  ```
+  Stack doesn't support a `master` target, so you'll need to pin the latest SHA until Hilt is released.
+
 
 ## Services
 
