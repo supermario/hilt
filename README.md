@@ -58,7 +58,7 @@ With the Haskell tool [`stack`](https://github.com/commercialhaskell/stack) inst
   packages:
   - location:
       git: https://github.com/supermario/hilt.git
-      commit: 419c4cd26f9888999d1ee7cdd7561473a1e0272c # Current Master Sha
+      commit: efa1540a0c914f4277d9e104f93fa7244f540652 # Current Master Sha
 
   extra-deps:
   - heroku-0.1.2.3
@@ -216,6 +216,10 @@ Generally you should only have one worker per channel, as messages can only be r
 Runs a Wai app on Warp with the provided `Websocket` handle. Also serves any static files from `/public`.
 
 There will be `runHttp` and `runWebsocketAndHttp` in future.
+
+#### Middlewares
+
+A number of common middlewares are provided, see [Server.hs](https://github.com/supermario/hilt/blob/master/src/Hilt/Server.hs#L43).
 
 
 ## Custom Services
