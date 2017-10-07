@@ -16,7 +16,7 @@ git clone git@github.com:supermario/hilt.git
 cd hilt && stack build && stack exec hilt-example
 
 # In another terminal window
-curl -i -N -H "Connection: Upgrade" -H "Upgrade: websocket" -H "Sec-WebSocket-Key: SGVsbG8sIHdvcmxkIQ==" localhost:8081
+curl -i -N -H "Connection: Upgrade" -H "Upgrade: websocket" -H "Sec-WebSocket-Key: SGVsbG8sIHdvcmxkIQ==" localhost:8081/ws
 ```
 
 The Hilt.Postgres service is not demonstrated as it needs an existing Postgres DB in the DATABASE_URL ENV var,

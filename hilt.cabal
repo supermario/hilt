@@ -37,9 +37,9 @@ library
                        , aeson
                        , bytestring
                        , cache
+                       , filepath
                        , heroku
                        , heroku-persistent
-
                        , http-types
                        , managed
                        , monad-control
@@ -62,7 +62,9 @@ library
                        , transformers
                        , unagi-chan
                        , wai
+                       , wai-cors
                        , wai-extra
+                       , wai-middleware-static
                        , wai-websockets
                        , warp
                        , websockets

@@ -77,7 +77,7 @@ Hilt currently provides the following types of services:
 * [`Channel`](#channel): typed read/write channel service with workers
 * [`Cache`](#cache): an in-memory key-value cache service
 
-You can use these services as-is, or as reference code to pull out and create your own services as needed. They are intended to be compact and easy to understand.
+You can use these services as-is, or as reference code to pull out and create your own services as needed – each one is contained in a single file. They are intended to be compact and easy to understand.
 
 Hilt also provides some helpers; [`Config`](#config), [`JSON`](#json) and [`Server`](#server).
 
@@ -213,7 +213,7 @@ Generally you should only have one worker per channel, as messages can only be r
 
 `runWebsocket :: Websocket.Handle -> IO ()`
 
-Runs a Wai app on Warp with the provided `Websocket` handle.
+Runs a Wai app on Warp with the provided `Websocket` handle. Also serves any static files from `/public`.
 
 There will be `runHttp` and `runWebsocketAndHttp` in future.
 
