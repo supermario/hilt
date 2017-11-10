@@ -4,7 +4,7 @@
 
 It is intended to be used at the base level of your Haskell application, providing some structure for your business logic.
 
-:warning: Hilt is still highly experimental and changing frequently.
+:warning: Hilt is still alpha, questions/feedback welcome
 
 ## Table of Contents
 
