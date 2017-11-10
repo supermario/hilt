@@ -19,7 +19,9 @@ import Control.Monad.Managed (Managed, managed)
 
 Basic RDBMS style querying. Provides a couple of query functions while managing DB pool.
 
-The service looks for a DATABASE_URL ENV var containing a postgresql URL on load.
+The service looks for a DATABASE_URL ENV var containing a postgresql URL on load, i.e;
+
+"postgres://username:password@127.0.0.1:5432/databasename"
 
 == Quick Example
 
@@ -32,7 +34,6 @@ import Data.Maybe                          (fromMaybe)
 import Control.Monad.Logger                (runNoLoggingT, runStdoutLoggingT)
 import qualified Database.Persist.Sql as P (runSqlPersistMPool, ConnectionPool, insert)
 import Database.Persist.Postgresql         (SqlBackend, ConnectionString, createPostgresqlPool)
-import Database.Persist.Sqlite             (SqliteConf(..), createSqlitePool)
 import Database.Persist                    (Key, PersistEntityBackend, PersistEntity)
 
 import qualified Database.PostgreSQL.Simple     as SQL
@@ -89,12 +90,11 @@ insert handle element = queryP handle $ P.insert element
 -- Persistent Pool
 
 makePool :: Config.Environment -> IO P.ConnectionPool
-makePool Config.Test =
-  runNoLoggingT $ createSqlitePool (sqlDatabase $ sqliteConf Config.Test) (envPoolSize Config.Test)
 makePool e = do
-  -- Development / Staging / Production envs use Postgres and DATABASE_URL
   connStr <- lookupDatabaseUrl
-  runStdoutLoggingT $ createPostgresqlPool connStr (envPoolSize e)
+  case e of
+    Config.Test -> runNoLoggingT $ createPostgresqlPool connStr (envPoolSize e)
+    _           -> runStdoutLoggingT $ createPostgresqlPool connStr (envPoolSize e)
 
 
 -- @TODO this should be configurable
@@ -103,12 +103,6 @@ envPoolSize Config.Development = 1
 envPoolSize Config.Test        = 1
 envPoolSize Config.Staging     = 1
 envPoolSize Config.Production  = 8
-
-
-sqliteConf :: Config.Environment -> SqliteConf
-sqliteConf Config.Test        = SqliteConf ":memory:" 1
-sqliteConf Config.Development = SqliteConf "./tmp/db-dev.sqlite" 1
-sqliteConf _                  = undefined
 
 
 -- PostgreSQL.Simple Pool

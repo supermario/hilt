@@ -47,7 +47,6 @@ library
                        , network-uri
                        , persistent
                        , persistent-postgresql
-                       , persistent-sqlite
                        , postgresql-simple
                        , postgresql-simple
                        , postgresql-simple-url
