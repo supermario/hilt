@@ -46,7 +46,7 @@ runWebsocket socketHandle = do
 -- add specific middleware behavior. For example, a common full stack might look like;
 --
 --    middlewares = compression . staticFiles "public" . allowCsrf . corsified
---    runApp      = run port $ Config.logger env . middlewares $ httpApp
+--    runApp      = run port $ middlewares httpApp
 
 
 -- | Basic HTTP Auth
