@@ -15,16 +15,31 @@ import Hilt.Handles.SocketServer
 
 import Control.Monad.Managed (Managed, managed)
 
+
+-- OnJoined = clientId -> totalClients -> IO (Maybe (response message))
+type OnJoined = ClientId -> Int -> IO (Maybe T.Text)
+
+
+-- OnReceive = clientId -> receivedMessage -> IO ()
+type OnReceive = ClientId -> T.Text -> IO ()
+
+
+type ClientId = Int
+type Client = (ClientId, WS.Connection)
+
+
 load :: OnJoined -> OnReceive -> Managed Handle
 load onJoined onReceive = managed $ withHandle onJoined onReceive
+
 
 loadDefault :: OnJoined -> OnReceive -> Managed Handle
 loadDefault onJoined onReceive = managed $ withHandle onJoined onReceive
 
+
 withHandle :: OnJoined -> OnReceive -> (Handle -> IO a) -> IO a
 withHandle onJoined onReceive f = do
-  mClients <- newTVarIO []
-  mClientIds <- newTVarIO [1..]
+  mClients   <- newTVarIO []
+  mClientIds <- newTVarIO [1 ..]
 
   f Handle
     { send      = sendImpl mClients
@@ -32,10 +47,11 @@ withHandle onJoined onReceive f = do
     , app       = appImpl mClients mClientIds onJoined onReceive
     }
 
+
 loadRaw :: OnJoined -> OnReceive -> IO Handle
 loadRaw onJoined onReceive = do
-  mClients <- newTVarIO []
-  mClientIds   <- newTVarIO [1..]
+  mClients   <- newTVarIO []
+  mClientIds <- newTVarIO [1 ..]
 
   return Handle
     { send      = sendImpl mClients
@@ -43,31 +59,20 @@ loadRaw onJoined onReceive = do
     , app       = appImpl mClients mClientIds onJoined onReceive
     }
 
-type ClientId = Int
-type ClientIds = [Int]
 
-type Client = (ClientId, WS.Connection)
-type Clients = [Client]
-
-type TClients = TVar Clients
-type TClientIds = TVar ClientIds
-
--- OnJoined = totalClients -> IO (Maybe (response message))
-type OnJoined = ClientId -> Int -> IO (Maybe T.Text)
--- OnReceive = receivedMessage -> -> IO ()
-type OnReceive = ClientId -> T.Text -> IO ()
-
-sendImpl :: TClients -> ClientId -> T.Text -> IO ()
+sendImpl :: TVar [Client] -> ClientId -> T.Text -> IO ()
 sendImpl mClients clientId message = do
   clients <- atomically $ readTVar mClients
   send_ clients clientId message
 
-broadcastImpl :: TClients -> T.Text -> IO ()
+
+broadcastImpl :: TVar [Client] -> T.Text -> IO ()
 broadcastImpl mClients message = do
   clients <- atomically $ readTVar mClients
   broadcast_ clients message
 
-appImpl :: TClients -> TClientIds -> OnJoined -> OnReceive -> WS.ServerApp
+
+appImpl :: TVar [Client] -> TVar [ClientId] -> OnJoined -> OnReceive -> WS.ServerApp
 appImpl mClients mClientIds onJoined onReceive pendingConn = do
   conn <- WS.acceptRequest pendingConn
   WS.forkPingThread conn 30
@@ -78,7 +83,7 @@ appImpl mClients mClientIds onJoined onReceive pendingConn = do
     writeTVar mClientIds remaining
     return next
 
-  let client = (clientId, conn)
+  let client     = (clientId, conn)
       disconnect = do
         atomically $ do
           clients <- readTVar mClients
@@ -96,35 +101,40 @@ appImpl mClients mClientIds onJoined onReceive pendingConn = do
     initText <- onJoined clientId clientCount
     case initText of
       Just text -> sendImpl mClients clientId text
-      Nothing -> do
-        -- @TODO PROBEL!M!
-        putStrLn "[WARNING] No init message for new client was provided"
+      Nothing   -> do
+        -- @TODO Should really be a NOTICE level log via a logger
+        T.putStrLn "[websocket:notice] No init message for new client was provided"
         return ()
 
     talk onReceive conn mClients client
 
-talk :: OnReceive -> WS.Connection -> TClients -> Client -> IO ()
+
+talk :: OnReceive -> WS.Connection -> TVar [Client] -> Client -> IO ()
 talk onReceive conn _ (clientId, _) = forever $ do
   msg <- WS.receiveData conn
   T.putStrLn ("[websocket:received] " <> T.pack (show clientId) <> ":" <> msg)
   onReceive clientId msg
 
-addClient :: Client -> Clients -> Clients
+
+addClient :: Client -> [Client] -> [Client]
 addClient client clients = client : clients
 
-removeClient :: Client -> Clients -> Clients
-removeClient client = filter ((/= fst client) . fst)
 
-findClient :: Clients -> ClientId -> Maybe Client
-findClient clients clientId = find ((== clientId) . fst) clients
+removeClient :: Client -> [Client] -> [Client]
+removeClient client = filter ((/=fst client) . fst)
 
-send_ :: Clients -> ClientId -> T.Text -> IO ()
-send_ clients clientId text =
-  case findClient clients clientId of
-    Just (_, conn) -> WS.sendTextData conn text
-    Nothing        -> return ()
 
-broadcast_ :: Clients -> T.Text -> IO ()
+findClient :: [Client] -> ClientId -> Maybe Client
+findClient clients clientId = find ((==clientId) . fst) clients
+
+
+send_ :: [Client] -> ClientId -> T.Text -> IO ()
+send_ clients clientId text = case findClient clients clientId of
+  Just (_, conn) -> WS.sendTextData conn text
+  Nothing        -> return ()
+
+
+broadcast_ :: [Client] -> T.Text -> IO ()
 broadcast_ clients message = do
   T.putStrLn ("[websocket:broadcast] " <> T.pack (show $ length clients) <> ":" <> message)
   forM_ clients $ \(_, conn) -> WS.sendTextData conn message
