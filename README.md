@@ -49,7 +49,7 @@ For a full, runnable example, see [app/Main.hs](app/Main.hs).
 
 With the Haskell tool [`stack`](https://github.com/commercialhaskell/stack) installed;
 
-- Create a new project with `stack new hilt-test new-template`, or adjust the `main` of an existing one
+- Create a new project with `stack new <projectname> new-template`, or adjust the `main` of an existing one
 - In your `project.cabal` under the `executable` section
   - Add `hilt` to the `build-depends` list
   - Add `default-extensions: OverloadedStrings`
