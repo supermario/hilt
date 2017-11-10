@@ -58,7 +58,7 @@ With the Haskell tool [`stack`](https://github.com/commercialhaskell/stack) inst
   packages:
   - location:
       git: https://github.com/supermario/hilt.git
-      commit: efa1540a0c914f4277d9e104f93fa7244f540652 # Current Master Sha
+      commit: 46afe91a7eace6ed8f88e03ce700b7d7f33aa548 # Current Master Sha
   ```
   Stack doesn't support a `master` target, so you'll need to pin the latest SHA until Hilt is released.
 
