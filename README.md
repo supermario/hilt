@@ -59,10 +59,6 @@ With the Haskell tool [`stack`](https://github.com/commercialhaskell/stack) inst
   - location:
       git: https://github.com/supermario/hilt.git
       commit: efa1540a0c914f4277d9e104f93fa7244f540652 # Current Master Sha
-
-  extra-deps:
-  - heroku-0.1.2.3
-  - heroku-persistent-0.2.0
   ```
   Stack doesn't support a `master` target, so you'll need to pin the latest SHA until Hilt is released.
 

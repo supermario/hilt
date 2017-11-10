@@ -27,22 +27,29 @@ The service looks for a DATABASE_URL ENV var containing a postgresql URL on load
 -- TODO
 @
 -}
+import Data.Monoid                         ((<>))
 import Data.Maybe                          (fromMaybe)
 import Control.Monad.Logger                (runNoLoggingT, runStdoutLoggingT)
 import qualified Database.Persist.Sql as P (runSqlPersistMPool, ConnectionPool, insert)
-import Database.Persist.Postgresql         (SqlBackend, ConnectionString, createPostgresqlPool, pgConnStr)
+import Database.Persist.Postgresql         (SqlBackend, ConnectionString, createPostgresqlPool)
 import Database.Persist.Sqlite             (SqliteConf(..), createSqlitePool)
 import Database.Persist                    (Key, PersistEntityBackend, PersistEntity)
 
 import qualified Database.PostgreSQL.Simple     as SQL
 import qualified Database.PostgreSQL.Simple.URL as SQLU
 import Database.PostgreSQL.Simple.SqlQQ         (sql)
-import qualified Web.Heroku.Persist.Postgresql  as Heroku
+
+import Network.URI (URIAuth, parseAbsoluteURI, uriScheme, uriAuthority, uriPath, uriRegName, uriPort, uriUserInfo, uriScheme)
+import System.Environment (getEnv)
 
 -- For readSqlChar
-import Database.PostgreSQL.Simple.FromField       (returnError, ResultError (..), Field, Conversion)
+import Database.PostgreSQL.Simple.FromField  (returnError, ResultError (..), Field, Conversion)
+import Text.Read                             (readMaybe)
+import Data.ByteString                       (ByteString)
+import Data.Text.Encoding                    (encodeUtf8)
 import qualified Data.ByteString.Char8 as B
-import Text.Read                                  (readMaybe)
+import qualified Data.Text as T
+import Data.Text (Text)
 import Data.Typeable
 
 import qualified Hilt.Config as Config
@@ -65,37 +72,32 @@ withHandle f = do
   -- putStrLn $ "RawConfig:" ++ rawConfig
 
   f Handle
-    { queryP = flip P.runSqlPersistMPool pool
-    , query_ = SQL.query_ conn
-    , query = SQL.query conn
+    { queryP  = flip P.runSqlPersistMPool pool
+    , query_  = SQL.query_ conn
+    , query   = SQL.query conn
     , execute = SQL.execute conn
-    , dbInfo = dbInfoImpl conn
+    , dbInfo  = dbInfoImpl conn
     }
 
 
 -- Utilities
 
-insert :: forall a . (PersistEntityBackend a ~ SqlBackend, PersistEntity a)
-  => Handle -> a -> IO (Key a)
+insert :: forall a . (PersistEntityBackend a ~ SqlBackend, PersistEntity a) => Handle -> a -> IO (Key a)
 insert handle element = queryP handle $ P.insert element
 
 
 -- Persistent Pool
 
 makePool :: Config.Environment -> IO P.ConnectionPool
-makePool Config.Test = runNoLoggingT $ createSqlitePool (sqlDatabase $ sqliteConf Config.Test) (envPoolSize Config.Test)
+makePool Config.Test =
+  runNoLoggingT $ createSqlitePool (sqlDatabase $ sqliteConf Config.Test) (envPoolSize Config.Test)
 makePool e = do
   -- Development / Staging / Production envs use Postgres and DATABASE_URL
   connStr <- lookupDatabaseUrl
   runStdoutLoggingT $ createPostgresqlPool connStr (envPoolSize e)
 
 
--- For staging/prod
--- Fetch postgres formatted DATABASE_URL ENV var (ala Heroku) and return Persistant ConnectionString
-lookupDatabaseUrl :: IO ConnectionString
-lookupDatabaseUrl = pgConnStr <$> Heroku.postgresConf 1 -- The 1 is dropped as we only pull out pgConnStr from the ADT
-
-
+-- @TODO this should be configurable
 envPoolSize :: Config.Environment -> Int
 envPoolSize Config.Development = 1
 envPoolSize Config.Test        = 1
@@ -104,9 +106,9 @@ envPoolSize Config.Production  = 8
 
 
 sqliteConf :: Config.Environment -> SqliteConf
-sqliteConf Config.Test = SqliteConf ":memory:" 1
+sqliteConf Config.Test        = SqliteConf ":memory:" 1
 sqliteConf Config.Development = SqliteConf "./tmp/db-dev.sqlite" 1
-sqliteConf _ = undefined
+sqliteConf _                  = undefined
 
 
 -- PostgreSQL.Simple Pool
@@ -118,11 +120,10 @@ makePoolRaw = do
 
 -- @ISSUE read default from somewhere controllable by user?
 defaultConnectInfo :: SQL.ConnectInfo
-defaultConnectInfo = SQL.defaultConnectInfo
-    { SQL.connectUser = "postgres"
-    , SQL.connectPassword = ""
-    , SQL.connectDatabase = "hilt_development"
-    }
+defaultConnectInfo = SQL.defaultConnectInfo { SQL.connectUser     = "postgres"
+                                            , SQL.connectPassword = ""
+                                            , SQL.connectDatabase = "hilt_development"
+                                            }
 
 
 -- Utilities
@@ -160,15 +161,15 @@ dbInfoImpl conn = do
   mapM (getTableInfo conn) tables
 
 
-pp :: forall a. Show a => a -> IO ()
+pp :: forall a . Show a => a -> IO ()
 pp a = putStrLn $ ppShow a
 
 
 getTableInfo :: SQL.Connection -> String -> IO TableInfo
 getTableInfo conn table = do
-  tableInfosRaw :: [(String,String,Bool)] <- SQL.query conn tableInfoQuery [table]
+  tableInfosRaw :: [(String, String, Bool)] <- SQL.query conn tableInfoQuery [table]
 
-  let fields = fmap (\(fieldName, fieldType, fieldNullable) -> FieldInfo{..}) tableInfosRaw
+  let fields = fmap (\(fieldName, fieldType, fieldNullable) -> FieldInfo {..}) tableInfosRaw
 
   return $ TableInfo table fields
 
@@ -176,11 +177,12 @@ getTableInfo conn table = do
 singleColumnString :: SQL.Connection -> SQL.Query -> IO [String]
 singleColumnString conn q = do
   column :: [[String]] <- SQL.query_ conn q
-  return $ filter (/= "") $ fmap (\c ->
-    case c of
-      [] -> ""
+  return $ filter (/="") $ fmap
+    ( \c -> case c of
+      []    -> ""
       (x:_) -> x
-    ) column
+    )
+    column
 
 
 dbInfoQuery :: SQL.Query
@@ -199,3 +201,75 @@ tableInfoQuery = [sql|
      AND a.attnum > 0 AND NOT a.attisdropped
    ORDER BY a.attnum
 |]
+
+
+-- Ports of heroku and heroku-persistent code to make stack based installs easier
+-- https://hackage.haskell.org/package/heroku-0.1.2.3/docs/src/Web-Heroku-Internal.html
+-- https://hackage.haskell.org/package/heroku-persistent-0.2.0/docs/src/Web-Heroku-Persist-Postgresql.html
+
+-- Fetch postgres formatted DATABASE_URL ENV var (ala Heroku) and return Persistant ConnectionString
+lookupDatabaseUrl :: IO ConnectionString
+lookupDatabaseUrl = do
+  connStr <- formatParams <$> dbConnParams
+  pure connStr
+
+
+formatParams :: [(Text, Text)] -> ByteString
+formatParams = encodeUtf8 . T.unwords . map toKeyValue
+
+
+toKeyValue :: (Text, Text) -> Text
+toKeyValue (k, v) = k <> "=" <> v
+
+
+dbConnParams :: IO [(Text, Text)]
+dbConnParams = dbConnParams' "DATABASE_URL" parseDatabaseUrl
+
+
+parseDatabaseUrl :: String -> [(Text, Text)]
+parseDatabaseUrl = parseDatabaseUrl' "postgres:"
+
+
+-- | read the DATABASE_URL environment variable
+-- and return an alist of connection parameters with the following keys:
+-- user, password, host, port, dbname
+--
+-- warning: just calls error if it can't parse correctly
+dbConnParams' :: String -> (String -> [(Text, Text)]) -> IO [(Text, Text)]
+dbConnParams' envVar parse = fmap parse (getEnv envVar)
+
+
+parseDatabaseUrl' :: String -> String -> [(Text, Text)]
+parseDatabaseUrl' scheme durl =
+  let muri         = parseAbsoluteURI durl
+      (auth, path) = case muri of
+        Nothing  -> error "couldn't parse absolute uri"
+        Just uri -> if uriScheme uri /= scheme
+          then schemeError uri
+          else case uriAuthority uri of
+            Nothing -> invalid
+            Just a  -> (a, uriPath uri)
+      (user, password) = userAndPassword auth
+  in  [ ( T.pack "user"
+        , user
+        )
+           -- tail not safe, but should be there on Heroku
+      , (T.pack "password", T.tail password)
+      , (T.pack "host"    , T.pack $ uriRegName auth)
+      , ( T.pack "port"
+        , T.pack $ removeColon $ uriPort auth
+        )
+         -- tail not safe but path should always be there
+      , (T.pack "dbname", T.pack $ Prelude.tail path)
+      ]
+ where
+  removeColon (':':port) = port
+  removeColon port       = port
+
+  -- init is not safe, but should be there on Heroku
+  userAndPassword :: URIAuth -> (Text, Text)
+  userAndPassword = T.breakOn (T.pack ":") . T.pack . Prelude.init . uriUserInfo
+
+  schemeError uri = error $ "was expecting a postgres scheme, not: " ++ uriScheme uri ++ "\n" ++ show uri
+  -- should be an error
+  invalid = error "could not parse heroku DATABASE_URL"

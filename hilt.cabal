@@ -38,14 +38,13 @@ library
                        , bytestring
                        , cache
                        , filepath
-                       , heroku
-                       , heroku-persistent
                        , http-types
                        , managed
                        , monad-control
                        , monad-logger
                        , mtl
                        , network
+                       , network-uri
                        , persistent
                        , persistent-postgresql
                        , persistent-sqlite
