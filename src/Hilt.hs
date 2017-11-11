@@ -85,29 +85,27 @@ import System.IO (hSetBuffering, hSetEncoding, BufferMode(..), stdout, utf8)
 
 
 -- | Wrapper for runManaged that than runs forever. See example above for usage.
-manage :: forall a. Managed a -> IO ()
-manage things =
-  runManaged $ do
-    liftIO stdoutSetup
-    _ <- things
-    -- Wait until the the process is killed
-    forever $ liftIO $ threadDelay 100000
+manage :: forall a . Managed a -> IO ()
+manage things = runManaged $ do
+  liftIO stdoutSetup
+  _ <- things
+  -- Wait until the the process is killed
+  forever $ liftIO $ threadDelay 100000
 
 
 -- | Wrapper for runManaged that than runs once. See example above for usage.
-once :: forall a. Managed a -> IO ()
-once things =
-  runManaged $ do
-    liftIO stdoutSetup
-    _ <- things
-    return ()
+once :: forall a . Managed a -> IO ()
+once things = runManaged $ do
+  liftIO stdoutSetup
+  _ <- things
+  pure ()
 
 
 -- | Force LineBuffering for consistent output behavior
 stdoutSetup :: IO ()
 stdoutSetup = do
   hSetBuffering stdout LineBuffering
-  hSetEncoding stdout utf8
+  hSetEncoding  stdout utf8
 
 
 -- | TBC, for testing.

@@ -4,6 +4,8 @@ import Text.Read                            (readMaybe)
 import qualified System.Environment as E    (lookupEnv)
 import Network.Wai                          (Middleware)
 import Network.Wai.Middleware.RequestLogger (logStdoutDev, logStdout)
+import Data.Maybe                           (fromMaybe)
+
 
 data Environment =
     Development
@@ -12,21 +14,20 @@ data Environment =
   | Production
   deriving (Eq, Show, Read)
 
+
 lookupEnv :: Read a => String -> a -> IO a
 lookupEnv name defaultVal = do
   param <- E.lookupEnv name
-  return $ case param of
+  pure $ case param of
     Nothing -> defaultVal
-    Just a  -> case readMaybe a of
-      Nothing -> defaultVal
-      Just b  -> b
+    Just a  -> fromMaybe defaultVal (readMaybe a)
+
 
 lookupEnvString :: String -> String -> IO String
 lookupEnvString name defaultVal = do
   param <- E.lookupEnv name
-  return $ case param of
-    Nothing -> defaultVal
-    Just a  -> a
+  pure $ fromMaybe defaultVal param
+
 
 logger :: Environment -> Middleware
 logger Test        = id

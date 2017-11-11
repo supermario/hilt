@@ -22,7 +22,7 @@ toJson :: ToJSON a => a -> Text
 toJson = TL.toStrict . TLE.decodeUtf8 . encode
 
 fromJson :: FromJSON a => Text -> Either String a
-fromJson =  eitherDecode . BL.fromStrict . TE.encodeUtf8
+fromJson = eitherDecode . BL.fromStrict . TE.encodeUtf8
 
 dropPrefix :: String -> Options
 dropPrefix s = defaultOptions { fieldLabelModifier = (\(x:xs) -> map toLower [x] ++ xs) . drop (length s) }
@@ -34,4 +34,4 @@ parseUtcTime = parseTimeM False defaultTimeLocale "%FT%T%QZ"
 utcTimeParser :: String -> Parser UTCTime
 utcTimeParser expires = case parseUtcTime expires of
   Nothing -> fail "utcTime value has to be of the following format: YYYY-MM-DDTHH:MM:SS.SZ"
-  Just e  -> return e
+  Just e  -> pure e

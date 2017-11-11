@@ -16,7 +16,6 @@ import Network.Wai.Middleware.Static     (staticPolicy, policy, Policy)
 import Network.Wai.Middleware.Gzip       (gzip, def)
 import qualified Network.Wai.Middleware.ForceSSL as M (forceSSL)
 
-
 import qualified Hilt.Config as Config
 import qualified Hilt.SocketServer as SocketServer
 
@@ -52,7 +51,7 @@ runWebsocket socketHandle = do
 -- | Basic HTTP Auth
 -- The following header will be set: @Access-Control-Allow-Headers: x-csrf-token@.
 auth :: ByteString -> ByteString -> Middleware
-auth username password = basicAuth (\u p -> return $ u == username && p == password) "Authentication"
+auth username password = basicAuth (\u p -> pure $ u == username && p == password) "Authentication"
 
 
 -- | @x-csrf-token@ allowance.

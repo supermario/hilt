@@ -20,11 +20,11 @@ load = managed withHandle
 withHandle :: (SocketServer.Handle -> IO a) -> IO a
 withHandle f = do
   mClients <- newMVar []
-  mNames   <- newMVar [1..]
+  mNames   <- newMVar [1 ..]
 
   f SocketServer.Handle
     { SocketServer.broadcast = broadcastImpl mClients
-    , SocketServer.app = appImpl mClients mNames
+    , SocketServer.app       = appImpl mClients mNames
     }
 
 type Client = (Int, WS.Connection)
@@ -42,27 +42,26 @@ appImpl mState mNames pendingConn = do
   WS.forkPingThread conn 30
 
   name:names <- readMVar mNames
-  modifyMVar_ mNames $ \_ -> return names
+  modifyMVar_ mNames $ \_ -> pure names
 
-  let client = (name, conn)
-      disconnect = modifyMVar_ mState $ \s -> return $ removeClient client s
+  let client     = (name, conn)
+      disconnect = modifyMVar_ mState $ \s -> pure $ removeClient client s
 
   flip finally disconnect $ do
-    modifyMVar_ mState $ \s -> return $ addClient client s
+    modifyMVar_ mState $ \s -> pure $ addClient client s
 
     talk conn mState client
 
 talk :: WS.Connection -> MVar ServerState -> Client -> IO ()
 talk conn state (user, _) = forever $ do
   msg <- WS.receiveData conn
-  readMVar state >>= broadcast
-    (T.pack (show user) <> ":" <> msg)
+  readMVar state >>= broadcast (T.pack (show user) <> ":" <> msg)
 
 addClient :: Client -> ServerState -> ServerState
 addClient client clients = client : clients
 
 removeClient :: Client -> ServerState -> ServerState
-removeClient client = filter ((/= fst client) . fst)
+removeClient client = filter ((/=fst client) . fst)
 
 broadcast :: T.Text -> ServerState -> IO ()
 broadcast message clients = do

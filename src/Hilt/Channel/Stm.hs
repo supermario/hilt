@@ -17,18 +17,16 @@ withHandle f = do
   chan <- atomically (newTChan :: STM (TChan a))
 
   f Channel.Handle
-    { Channel.read = readImpl chan
-    , Channel.write = writeImpl chan
+    { Channel.read   = readImpl chan
+    , Channel.write  = writeImpl chan
     , Channel.worker = workerImpl chan
     }
 
 readImpl :: TChan a -> IO a
-readImpl chan =
-  atomically $ readTChan chan
+readImpl chan = atomically $ readTChan chan
 
 writeImpl :: TChan a -> a -> IO ()
-writeImpl chan text =
-  atomically $ writeTChan chan text
+writeImpl chan text = atomically $ writeTChan chan text
 
 workerImpl :: TChan a -> (a -> IO ()) -> IO ()
 workerImpl chan handler = do
@@ -36,4 +34,4 @@ workerImpl chan handler = do
   _ <- ST.fork $ forever $ do
     text <- atomically $ readTChan chan
     handler text
-  return ()
+  pure ()

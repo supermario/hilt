@@ -14,11 +14,11 @@ load = managed withHandle
 
 withHandle :: (Handle -> IO a) -> IO a
 withHandle f = do
-  (w,r) <- newChan
+  (w, r) <- newChan
 
   f Handle
-    { read = readChan r
-    , write = writeChan w
+    { read   = readChan r
+    , write  = writeChan w
     , worker = workerImpl r
     }
 
@@ -28,4 +28,4 @@ workerImpl chan handler = do
   _ <- ST.fork $ forever $ do
     text <- readChan chan
     handler text
-  return ()
+  pure ()

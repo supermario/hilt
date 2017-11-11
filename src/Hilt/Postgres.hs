@@ -110,7 +110,7 @@ envPoolSize Config.Production  = 8
 makePoolRaw :: IO SQL.ConnectInfo
 makePoolRaw = do
   connStr <- Config.lookupEnvString "DATABASE_URL" ""
-  return $ fromMaybe defaultConnectInfo (SQLU.parseDatabaseUrl connStr)
+  pure $ fromMaybe defaultConnectInfo (SQLU.parseDatabaseUrl connStr)
 
 -- @ISSUE read default from somewhere controllable by user?
 defaultConnectInfo :: SQL.ConnectInfo
@@ -165,13 +165,13 @@ getTableInfo conn table = do
 
   let fields = fmap (\(fieldName, fieldType, fieldNullable) -> FieldInfo {..}) tableInfosRaw
 
-  return $ TableInfo table fields
+  pure $ TableInfo table fields
 
 
 singleColumnString :: SQL.Connection -> SQL.Query -> IO [String]
 singleColumnString conn q = do
   column :: [[String]] <- SQL.query_ conn q
-  return $ filter (/="") $ fmap
+  pure $ filter (/="") $ fmap
     ( \c -> case c of
       []    -> ""
       (x:_) -> x

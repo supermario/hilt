@@ -23,11 +23,11 @@ loadDefault onJoined = managed $ withHandle onJoined
 withHandle :: OnJoined -> (SocketServer.Handle -> IO a) -> IO a
 withHandle onJoined f = do
   mClients <- newMVar []
-  mNames   <- newMVar [1..]
+  mNames   <- newMVar [1 ..]
 
   f SocketServer.Handle
     { SocketServer.broadcast = broadcastImpl mClients
-    , SocketServer.app = appImpl mClients mNames onJoined
+    , SocketServer.app       = appImpl mClients mNames onJoined
     }
 
 -- Arguments represent;
@@ -49,16 +49,16 @@ appImpl mClients mNames onJoined pendingConn = do
   WS.forkPingThread conn 30
 
   name:names <- readMVar mNames
-  modifyMVar_ mNames $ \_ -> return names
+  modifyMVar_ mNames $ \_ -> pure names
 
-  let client = (name, conn)
-      disconnect = modifyMVar_ mClients $ \s -> return $ removeClient client s
+  let client     = (name, conn)
+      disconnect = modifyMVar_ mClients $ \s -> pure $ removeClient client s
 
   flip finally disconnect $ do
-    modifyMVar_ mClients $ \s -> return $ addClient client s
+    modifyMVar_ mClients $ \s -> pure $ addClient client s
 
     clients <- readMVar mClients
-    _ <- onJoined name (length clients)
+    _       <- onJoined name (length clients)
 
     talk conn mClients client
 
@@ -72,7 +72,7 @@ addClient :: Client -> ServerState -> ServerState
 addClient client clients = client : clients
 
 removeClient :: Client -> ServerState -> ServerState
-removeClient client = filter ((/= fst client) . fst)
+removeClient client = filter ((/=fst client) . fst)
 
 broadcast :: T.Text -> ServerState -> IO ()
 broadcast message clients = do

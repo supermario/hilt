@@ -53,7 +53,7 @@ loadRaw onJoined onReceive = do
   mClients   <- newTVarIO []
   mClientIds <- newTVarIO [1 ..]
 
-  return Handle
+  pure Handle
     { send      = sendImpl mClients
     , broadcast = broadcastImpl mClients
     , app       = appImpl mClients mClientIds onJoined onReceive
@@ -81,7 +81,7 @@ appImpl mClients mClientIds onJoined onReceive pendingConn = do
     clientIds <- readTVar mClientIds
     let next:remaining = clientIds
     writeTVar mClientIds remaining
-    return next
+    pure next
 
   let client     = (clientId, conn)
       disconnect = do
@@ -90,13 +90,13 @@ appImpl mClients mClientIds onJoined onReceive pendingConn = do
           writeTVar mClients $ removeClient client clients
 
         T.putStrLn ("[websocket:disconnect] " <> T.pack (show clientId))
-        return ()
+        pure ()
 
   flip finally disconnect $ do
     clientCount <- atomically $ do
       clients <- readTVar mClients
       writeTVar mClients $ addClient client clients
-      return $ length clients
+      pure $ length clients
 
     initText <- onJoined clientId clientCount
     case initText of
@@ -104,7 +104,7 @@ appImpl mClients mClientIds onJoined onReceive pendingConn = do
       Nothing   -> do
         -- @TODO Should really be a NOTICE level log via a logger
         T.putStrLn "[websocket:notice] No init message for new client was provided"
-        return ()
+        pure ()
 
     talk onReceive conn mClients client
 
@@ -131,7 +131,7 @@ findClient clients clientId = find ((==clientId) . fst) clients
 send_ :: [Client] -> ClientId -> T.Text -> IO ()
 send_ clients clientId text = case findClient clients clientId of
   Just (_, conn) -> WS.sendTextData conn text
-  Nothing        -> return ()
+  Nothing        -> pure ()
 
 
 broadcast_ :: [Client] -> T.Text -> IO ()
