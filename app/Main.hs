@@ -35,33 +35,34 @@ main = Hilt.manage $ do
   logger <- Logger.load
   chan   <- Channel.load
 
-  let
-    onJoined :: Websocket.OnJoined
-    onJoined clientId clientCount = do
-      Logger.debug logger $ showt clientId <> " joined, " <> showt clientCount <> " connected."
-      return $ Just "Hello client!"
+  let onJoined :: Websocket.OnJoined
+      onJoined clientId clientCount = do
+        Logger.debug logger $ showt clientId <> " joined, " <> showt clientCount <> " connected."
+        pure $ Just "Hello client!"
 
-    onReceive :: Websocket.OnReceive
-    onReceive clientId text = do
-      Logger.debug logger $ showt clientId <> " said " <> showt text
-      Channel.write chan text
+      onReceive :: Websocket.OnReceive
+      onReceive clientId text = do
+        Logger.debug logger $ showt clientId <> " said " <> showt text
+        Channel.write chan text
 
   websocket <- Websocket.load onJoined onReceive
-
 
   -- Now we can write our business logic using our services
   Hilt.program $ do
     Logger.debug logger "Starting up!"
 
     -- Log all messages received, then broadcast back to all clients
-    Channel.worker chan (\text -> do
-        Logger.debug logger ("[worker] got " <> text)
-        Websocket.broadcast websocket text
-      )
+    let workHandler text = do
+          Logger.debug logger $ "[worker] got " <> text
+          Websocket.broadcast websocket text
 
-    Channel.write chan "Hello world!"
 
-    -- Or pass services off to some other areas of your app
+    -- Run our worker and our websocket server
+    Channel.worker chan workHandler
+    Hilt.Server.runWebsocket websocket
+
+    -- Now we can pass services off to some other areas of our app
     -- someMoreLogic logger chan
 
-    Hilt.Server.runWebsocket websocket
+    -- Or we can just use them here
+    Channel.write chan "Hello world!"
