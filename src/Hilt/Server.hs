@@ -20,10 +20,6 @@ import qualified Hilt.Config as Config
 import qualified Hilt.SocketServer as SocketServer
 
 
-defaultMiddlewares :: Network.Wai.Application -> Network.Wai.Application
-defaultMiddlewares = compression . staticFiles "public" . allowCsrf . corsified
-
-
 {- Fork a thread and boot the http server as a Wai app on Warp -}
 runHttp :: Network.Wai.Application -> IO ()
 runHttp = boot
@@ -71,6 +67,10 @@ printStatus env port = do
 --
 --    middlewares = compression . staticFiles "public" . allowCsrf . corsified
 --    runApp      = run port $ middlewares httpApp
+
+
+defaultMiddlewares :: Network.Wai.Application -> Network.Wai.Application
+defaultMiddlewares = compression . staticFiles "public" . allowCsrf . corsified
 
 
 -- | Basic HTTP Auth

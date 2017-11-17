@@ -6,6 +6,8 @@ It is intended to be used at the base level of your Haskell application, providi
 
 :warning: Hilt is still alpha, questions/feedback welcome
 
+
+
 ## Table of Contents
 
 - [Example](#example)
@@ -19,6 +21,8 @@ It is intended to be used at the base level of your Haskell application, providi
 - [Helpers](#helpers)
 - [Custom Services](#custom-services)
 - [Implementation Details](#implementation-details)
+
+
 
 
 ## Example
@@ -45,6 +49,8 @@ Hilt handles the underlying mechanics, threads, async behaviour, safety and serv
 For a full, runnable example, see [app/Main.hs](app/Main.hs).
 
 
+
+
 ## Setup
 
 With the Haskell tool [`stack`](https://github.com/commercialhaskell/stack) installed;
@@ -58,9 +64,11 @@ With the Haskell tool [`stack`](https://github.com/commercialhaskell/stack) inst
   packages:
   - location:
       git: https://github.com/supermario/hilt.git
-      commit: 46afe91a7eace6ed8f88e03ce700b7d7f33aa548 # Current Master Sha
+      commit: ff201470654dfb97f8b30ad98f2cac8e58654acd # Current Master Sha
   ```
   Stack doesn't support a `master` target, so you'll need to pin the latest SHA until Hilt is released.
+
+
 
 
 ## Services
@@ -76,6 +84,9 @@ Hilt currently provides the following types of services:
 You can use these services as-is, or as reference code to pull out and create your own services as needed – each one is contained in a single file. They are intended to be compact and easy to understand.
 
 Hilt also provides some helpers; [`Config`](#config), [`JSON`](#json) and [`Server`](#server).
+
+
+
 
 ### Logger
 
@@ -98,7 +109,7 @@ In addition to `.debug` You can also use `.info`, `.warning` and `.error`.
 
 This service has a couple of moving parts. We need to
 
-- specify what we want to for `onJoined` and `onReceive` events
+- specify what we want to do for `onJoined` and `onReceive` events
 - boot the HTTP server.
 
 ##### Interface:
@@ -120,7 +131,6 @@ main = Hilt.manage $ do
   websocket <- Websocket.load onJoined onReceive
 
   Hilt.program $ do
-    -- Start a HTTP server on port 8081
     Hilt.Server.runWebsocket websocket
 ```
 
@@ -184,6 +194,7 @@ Cache currently requires both key and value to be type [`Text`](https://hackage.
 
 
 
+
 ### Channel
 
 A channel is a simple text based queue. You can write values to it, and read values from it. Once a value is read, it is no longer on the queue.
@@ -203,32 +214,51 @@ Create a handle with `chan <- Channel.load` and then:
 Generally you should only have one worker per channel, as messages can only be read once.
 
 
+
+
 ## Helpers
 
 ### Server
 
-`runWebsocket :: Websocket.Handle -> IO ()`
+This file has helpers for booting HTTP servers. They all read the following ENV vars:
 
-Runs a Wai app on Warp with the provided `Websocket` handle. Also serves any static files from `/public`.
+| var name | Default       | Value   |
+| -        | -             | -       |
+| PORT     | 8081          | 0-65535 |
+| ENV      | "Development" | [`Hilt.Config.Environment`](https://github.com/supermario/hilt/blob/master/src/Hilt/Config.hs#L10-L15) values: `Development` &#124; `Test` &#124; `Staging` &#124; `Production` |
 
-There will be `runHttp` and `runWebsocketAndHttp` in future.
+- You can override by prefixing like so: `ENV=Staging PORT=3030 stack exec yourAppName`.
+- `Development`/`Staging` environments use the development logger. `Test` uses `id` (no logging).
+- Default middlewares are [here](https://github.com/supermario/hilt/blame/master/src/Hilt/Server.hs#L72).
+
+In future there will likely be a `Hilt.Http` service, in the meantime any `Wai` app will work. I'd recommend [servant](http://haskell-servant.readthedocs.io/en/stable/index.html).
+
+
+|            | Usage                                  | Description |
+| -          | -                                      | -           |
+| **runHttp** | `Server.runHttp waiApp` | Run the given `Wai` app |
+| **runWebsocket** | `Server.runWebsocket socketHandle`  | Run the `Websocket` service at `/ws`  |
+| **runWebsocketAndHttp** | `Server.runWebsocketAndHttp socketHandle waiApp` | Run both the `Websocket` service and the `Wai` service together  |
 
 #### Middlewares
 
-A number of common middlewares are provided, see [Server.hs](https://github.com/supermario/hilt/blob/master/src/Hilt/Server.hs#L43).
+A number of common middlewares are provided, see [Server.hs](https://github.com/supermario/hilt/blob/master/src/Hilt/Server.hs#L67).
+
+
 
 
 ## Custom Services
 
 Hilt services are no more than an `IO` value wrapped by [`Control.Monad.Managed`](https://hackage.haskell.org/package/managed).
 
-For example, if you wanted to write your own Hilt service for a storage-backed channel that survives program restarts, you might:
+For example, say you wanted to write a Hilt service for a storage-backed channel that survives program restarts, you might:
 
 * create your own channel service from scratch with baked in storage functionality
 * or, create a `Hilt.Channel.DB` service and have it require a `Hilt.Handles.Postgres` service to use for persistence
 * or, use an existing implementation you have and run it under [managed](https://hackage.haskell.org/package/managed) (for which [Hilt.managed](src/Hilt.hs#L85-L91) is just a wrapper), exposing a service interface
 
 Services are very simple, take a look at [Cache](src/Hilt/Cache.hs) for example, which just wraps the `Data.Cache` lib as-is.
+
 
 
 
