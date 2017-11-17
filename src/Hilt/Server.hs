@@ -5,10 +5,10 @@ import Data.ByteString (ByteString)
 
 import qualified Network.Wai.Handler.Warp as Warp
 import Network.HTTP.Types                (status404)
-import Network.Wai.Handler.WebSockets    (websocketsOr)
-import Network.WebSockets                (defaultConnectionOptions)
+import Network.WebSockets                (ServerApp, defaultConnectionOptions)
 import System.FilePath                   ((</>))
-import Network.Wai                       (Middleware, responseLBS)
+import Network.Wai                       (Application, Middleware, responseLBS)
+import Network.Wai.Handler.WebSockets    (websocketsOr)
 import Network.Wai.Middleware.AddHeaders (addHeaders)
 import Network.Wai.Middleware.Cors       (CorsResourcePolicy(..), cors)
 import Network.Wai.Middleware.HttpAuth   (basicAuth)
@@ -20,23 +20,48 @@ import qualified Hilt.Config as Config
 import qualified Hilt.SocketServer as SocketServer
 
 
-{- Fork a thread and boot the socket server as a Wai app on Warp -}
+defaultMiddlewares :: Network.Wai.Application -> Network.Wai.Application
+defaultMiddlewares = compression . staticFiles "public" . allowCsrf . corsified
+
+
+{- Fork a thread and boot the http server as a Wai app on Warp -}
+runHttp :: Network.Wai.Application -> IO ()
+runHttp = boot
+
+
+{- Fork a thread and boot the websocket server as a Wai app on Warp -}
 runWebsocket :: SocketServer.Handle -> IO ()
 runWebsocket socketHandle = do
-  port <- Config.lookupEnv "PORT" 8081
-
-  -- @TODO serve static asset middleware
   let backupApp _ respond = respond $ responseLBS status404 [] "Not found."
-      waiApp      = websocketsOr defaultConnectionOptions (SocketServer.app socketHandle) backupApp
-      middlewares = staticFiles "public"
+      waiApp = websocketsOr defaultConnectionOptions (SocketServer.app socketHandle) backupApp
 
-  _ <- forkIO $ Warp.run port $ middlewares waiApp
+  boot waiApp
 
-  return ()
 
--- runHttp @TODO
--- runWebsocketAndHttp @TODO
+{- Fork a thread and boot websocket and http combined server as a Wai app on Warp -}
+runWebsocketAndHttp :: Network.WebSockets.ServerApp -> Network.Wai.Application -> IO ()
+runWebsocketAndHttp wsApp webApp = do
+  let waiApp = websocketsOr defaultConnectionOptions wsApp webApp
 
+  boot waiApp
+
+
+boot :: Network.Wai.Application -> IO ()
+boot waiApp = do
+  port <- Config.lookupEnv "PORT" 8081
+  env  <- Config.lookupEnv "ENV" Config.Development
+
+  printStatus env port
+
+  _ <- forkIO $ Warp.run port $ Config.logger env . defaultMiddlewares $ waiApp
+
+  pure ()
+
+
+printStatus :: Config.Environment -> Int -> IO ()
+printStatus env port = do
+  putStrLn $ "Environment: " ++ show env
+  putStrLn $ "Server started: http://localhost:" ++ show port
 
 
 -- Middlewares
