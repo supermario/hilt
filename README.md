@@ -235,14 +235,13 @@ In future there will likely be a `Hilt.Http` service, in the meantime any `Wai` 
 
 |            | Usage                                  | Description |
 | -          | -                                      | -           |
-| **runHttp** | `Server.runHttp waiApp` | Run the given `Wai` app |
-| **runWebsocket** | `Server.runWebsocket socketHandle`  | Run the `Websocket` service at `/ws`  |
-| **runWebsocketAndHttp** | `Server.runWebsocketAndHttp socketHandle waiApp` | Run both the `Websocket` service and the `Wai` service together  |
+| **runHttp** | `runHttp waiApp defaultMiddlewares` | Run the given `Wai` app |
+| **runWebsocket** | `runWebsocket socketHandle defaultMiddlewares`  | Run the `Websocket` service at `/ws`  |
+| **runWebsocketAndHttp** | `runWebsocketAndHttp socketHandle waiApp defaultMiddlewares` | Run both the `Websocket` service and the `Wai` service together  |
 
 #### Middlewares
 
 A number of common middlewares are provided, see [Server.hs](https://github.com/supermario/hilt/blob/master/src/Hilt/Server.hs#L67).
-
 
 
 

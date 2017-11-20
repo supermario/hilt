@@ -1,9 +1,9 @@
 module Main where
 
 import           TextShow
-import           Data.Monoid        ((<>))
+import           Data.Monoid ((<>))
 import qualified Hilt
-import qualified Hilt.Server
+import qualified Hilt.Server       as Server
 import qualified Hilt.Channel      as Channel
 import qualified Hilt.Logger       as Logger
 import qualified Hilt.SocketServer as Websocket
@@ -58,11 +58,11 @@ main = Hilt.manage $ do
 
 
     -- Run our worker and our websocket server
-    Channel.worker chan workHandler
-    Hilt.Server.runWebsocket websocket
+    Channel.worker      chan      workHandler
+    Server.runWebsocket websocket Server.defaultMiddlewares
 
     -- Now we can pass services off to some other areas of our app
     -- someMoreLogic logger chan
 
     -- Or we can just use them here
-    Channel.write chan "Hello world!"
+    Channel.write       chan      "Hello world!"

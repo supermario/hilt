@@ -20,36 +20,38 @@ import qualified Hilt.Config as Config
 import qualified Hilt.SocketServer as SocketServer
 
 
+type Middlewares = (Network.Wai.Application -> Network.Wai.Application)
+
 {- Fork a thread and boot the http server as a Wai app on Warp -}
-runHttp :: Network.Wai.Application -> IO ()
+runHttp :: Network.Wai.Application -> Middlewares -> IO ()
 runHttp = boot
 
 
 {- Fork a thread and boot the websocket server as a Wai app on Warp -}
-runWebsocket :: SocketServer.Handle -> IO ()
-runWebsocket socketHandle = do
+runWebsocket :: SocketServer.Handle -> Middlewares -> IO ()
+runWebsocket socketHandle middlewares = do
   let backupApp _ respond = respond $ responseLBS status404 [] "Not found."
       waiApp = websocketsOr defaultConnectionOptions (SocketServer.app socketHandle) backupApp
 
-  boot waiApp
+  boot waiApp middlewares
 
 
 {- Fork a thread and boot websocket and http combined server as a Wai app on Warp -}
-runWebsocketAndHttp :: Network.WebSockets.ServerApp -> Network.Wai.Application -> IO ()
-runWebsocketAndHttp wsApp webApp = do
+runWebsocketAndHttp :: Network.WebSockets.ServerApp -> Network.Wai.Application -> Middlewares -> IO ()
+runWebsocketAndHttp wsApp webApp middlewares = do
   let waiApp = websocketsOr defaultConnectionOptions wsApp webApp
 
-  boot waiApp
+  boot waiApp middlewares
 
 
-boot :: Network.Wai.Application -> IO ()
-boot waiApp = do
+boot :: Network.Wai.Application -> Middlewares -> IO ()
+boot waiApp middlewares = do
   port <- Config.lookupEnv "PORT" 8081
   env  <- Config.lookupEnv "ENV" Config.Development
 
   printStatus env port
 
-  _ <- forkIO $ Warp.run port $ Config.logger env . defaultMiddlewares $ waiApp
+  _ <- forkIO $ Warp.run port $ Config.logger env . middlewares $ waiApp
 
   pure ()
 
