@@ -33,7 +33,7 @@ library
                      , Hilt.Handles.Postgres
                      , Hilt.Handles.SocketServer
 
-  build-depends:       base >= 4.7 && < 5
+  build-depends:       base
                        , aeson
                        , bytestring
                        , cache
