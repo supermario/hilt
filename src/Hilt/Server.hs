@@ -1,4 +1,4 @@
-module Hilt.Server where
+module Hilt.Server (module Hilt.Server, addHeaders) where
 
 import Control.Concurrent (forkIO)
 import Data.ByteString (ByteString)
