@@ -113,13 +113,13 @@ forceSSL = M.forceSSL
 --
 -- This policy will set the following:
 --
--- * RequestHeaders: @Content-Type@
+-- * RequestHeaders: @Content-Type, Authorization, Origin@
 -- * MethodsAllowed: @OPTIONS, GET, PUT, POST@
 appCorsResourcePolicy :: CorsResourcePolicy
 appCorsResourcePolicy = CorsResourcePolicy
   { corsOrigins        = Nothing
   , corsMethods        = ["OPTIONS", "GET", "PUT", "POST"]
-  , corsRequestHeaders = ["Authorization", "Content-Type"]
+  , corsRequestHeaders = ["Authorization", "Content-Type", "Origin"]
   , corsExposedHeaders = Nothing
   , corsMaxAge         = Nothing
   , corsVaryOrigin     = False
