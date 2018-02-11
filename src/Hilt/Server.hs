@@ -2,8 +2,9 @@ module Hilt.Server (module Hilt.Server, addHeaders) where
 
 import Control.Concurrent (forkIO)
 import Data.ByteString (ByteString)
+import Data.Function ((&))
 
-import qualified Network.Wai.Handler.Warp as Warp
+import qualified Network.Wai.Handler.Warp as W
 import Network.HTTP.Types                (status404)
 import Network.WebSockets                (ServerApp, defaultConnectionOptions)
 import System.FilePath                   ((</>))
@@ -49,9 +50,12 @@ boot waiApp middlewares = do
   port <- Config.lookupEnv "PORT" 8081
   env  <- Config.lookupEnv "ENV" Config.Development
 
-  printStatus env port
+  let run = W.defaultSettings
+              & W.setBeforeMainLoop (printStatus env port)
+              & W.setPort port
+              & W.runSettings
 
-  _ <- forkIO $ Warp.run port $ Config.logger env . middlewares $ waiApp
+  _ <- forkIO $ run $ Config.logger env . middlewares $ waiApp
 
   pure ()
 
