@@ -1,11 +1,9 @@
-resolver: lts-8.23
+resolver: lts-10.3
 
 packages:
 - '.'
 
 extra-deps:
-- postgresql-simple-url-0.1.0.1
-- unagi-chan-0.4.0.0
 
 flags: {}
 
