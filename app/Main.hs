@@ -1,12 +1,15 @@
 module Main where
 
-import           TextShow
-import           Data.Monoid ((<>))
+import Data.Text (Text, pack)
+import Data.Monoid ((<>))
 import qualified Hilt
 import qualified Hilt.Server       as Server
 import qualified Hilt.Channel      as Channel
 import qualified Hilt.Logger       as Logger
 import qualified Hilt.SocketServer as Websocket
+
+showt :: Show a => a -> Text
+showt t = pack $ show t
 
 {-
 To run this sample locally:
