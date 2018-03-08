@@ -37,15 +37,7 @@ loadDefault onJoined onReceive = managed $ withHandle onJoined onReceive
 
 
 withHandle :: OnJoined -> OnReceive -> (Handle -> IO a) -> IO a
-withHandle onJoined onReceive f = do
-  mClients   <- newTVarIO []
-  mClientIds <- newTVarIO [1 ..]
-
-  f Handle
-    { send      = sendImpl mClients
-    , broadcast = broadcastImpl mClients
-    , app       = appImpl mClients mClientIds onJoined onReceive
-    }
+withHandle onJoined onReceive f = loadRaw onJoined onReceive >>= f
 
 
 loadRaw :: OnJoined -> OnReceive -> IO Handle

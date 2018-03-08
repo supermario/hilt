@@ -60,8 +60,8 @@ load :: Managed Handle
 load = managed withHandle
 
 
-withHandle :: (Handle -> IO a) -> IO a
-withHandle f = do
+loadRaw :: IO Handle
+loadRaw = do
 
   -- @ISSUE should this be contained in a config service...?
   env       <- Config.lookupEnv "ENV" Config.Development
@@ -72,13 +72,17 @@ withHandle f = do
   -- @TODO how do implementations log? Should they demand a logger?
   -- putStrLn $ "RawConfig:" ++ rawConfig
 
-  f Handle
+  pure Handle
     { queryP  = flip P.runSqlPersistMPool pool
     , query_  = SQL.query_ conn
-    , query   = SQL.query conn
+    , query   = qWrap conn
     , execute = SQL.execute conn
     , dbInfo  = dbInfoImpl conn
     }
+
+
+withHandle :: (Handle -> IO a) -> IO a
+withHandle f = loadRaw >>= f
 
 
 -- Utilities
