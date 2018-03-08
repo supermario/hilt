@@ -75,7 +75,7 @@ loadRaw = do
   pure Handle
     { queryP  = flip P.runSqlPersistMPool pool
     , query_  = SQL.query_ conn
-    , query   = qWrap conn
+    , query   = SQL.query conn
     , execute = SQL.execute conn
     , dbInfo  = dbInfoImpl conn
     }
