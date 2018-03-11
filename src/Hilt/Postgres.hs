@@ -12,6 +12,8 @@ module Hilt.Postgres
 import Text.Show.Pretty (ppShow)
 import Hilt.Handles.Postgres
 import Control.Monad.Managed (Managed, managed)
+import Data.ByteString (ByteString)
+import Control.Monad (forever)
 
 {-|
 
@@ -39,6 +41,7 @@ import Database.Persist                    (Key, PersistEntityBackend, PersistEn
 import qualified Database.PostgreSQL.Simple     as SQL
 import qualified Database.PostgreSQL.Simple.URL as SQLU
 import Database.PostgreSQL.Simple.SqlQQ         (sql)
+import qualified Database.PostgreSQL.Simple.Notification as SQL
 
 import Network.URI (URIAuth, parseAbsoluteURI, uriScheme, uriAuthority, uriPath, uriRegName, uriPort, uriUserInfo, uriScheme)
 import System.Environment (getEnv)
@@ -51,6 +54,7 @@ import Data.Text.Encoding                    (encodeUtf8)
 import qualified Data.ByteString.Char8 as B
 import qualified Data.Text as T
 import Data.Text (Text)
+import Data.Text.Encoding as TL (decodeUtf8)
 import Data.Typeable
 
 import qualified Hilt.Config as Config
@@ -77,6 +81,7 @@ loadRaw = do
     , query_  = SQL.query_ conn
     , query   = SQL.query conn
     , execute = SQL.execute conn
+    , listen = listenImpl conn
     , dbInfo  = dbInfoImpl conn
     }
 
@@ -122,6 +127,12 @@ defaultConnectInfo = SQL.defaultConnectInfo { SQL.connectUser     = "postgres"
                                             , SQL.connectPassword = ""
                                             , SQL.connectDatabase = "hilt_development"
                                             }
+
+
+listenImpl :: SQL.Connection -> SQL.Query -> (Text -> IO ()) -> IO ()
+listenImpl conn query handler = do
+  _ <- SQL.execute_ conn query
+  forever $ SQL.getNotification conn >>= handler . TL.decodeUtf8 . SQL.notificationData
 
 
 -- Utilities

@@ -11,6 +11,7 @@ import Data.Text               (Text)
 import Data.Text.Lazy          as TL  (toStrict)
 import Data.Text.Lazy.Encoding as TLE (decodeUtf8)
 import Data.Text.Encoding      as TE  (encodeUtf8)
+import Data.ByteString (ByteString)
 import Data.ByteString.Lazy    as BL  (fromStrict)
 import Data.Time               (UTCTime, parseTimeM, defaultTimeLocale)
 

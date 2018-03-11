@@ -161,8 +161,8 @@ Create a handle with `db <- Postgres.load` and then:
 | **query_** | Run a [postgresql-simple](https://hackage.haskell.org/package/postgresql-simple/docs/Database-PostgreSQL-Simple.html) query and decode the results to the specified type. <br> <br> ```events :: [Event] <- Postgres.query_ db "SELECT * FROM events"``` |
 | **query** | Run a paramaterised [postgresql-simple](https://hackage.haskell.org/package/postgresql-simple/docs/Database-PostgreSQL-Simple.html) query and decode the results to the specified type. Params interpolate into `?` within the query. Use a singleton array `[a]` for a single param and tuples `(a,b,...)` for multiple params <br> <br> `events :: [Event] <- Postgres.query db "SELECT * FROM ?" ["events"]` |
 | **execute** | Run a [postgresql-simple](https://hackage.haskell.org/package/postgresql-simple/docs/Database-PostgreSQL-Simple.html) query that returns no results. Params interpolate into `?` within the query. Use a singleton array `[a]` for a single param and tuples `(a,b,...)` for multiple params or unit `()` for none <br> <br> `Postgres.execute db "DROP TABLE events" ()` |
+| **listen**   | Forks a worker that listens to a `LISTEN` query and runs the given handler for each message <br> <br> `Postgres.listen db "LISTEN an_event" (\text -> print text)` |
 | **queryP**   | Runs a persistent query. See the [persistent guide](http://www.yesodweb.com/book/persistent). <br> <br> `events :: [Event] <- Postgres.exec db $ selectList [] []` |
-| **queryMaybe** (TBC) |  Future idea; execute a postgres query and decode the results to the specified type. <br> <br> `events :: Maybe [Event] <- Postgres.queryMaybe db "SELECT * FROM events"` |
 
 :warning: The interface is rather raw currently, simply exposing certain parts of the underlying libraries to get a feel for the right approach. In the case of a failure, all of these will throw exceptions, which is not ideal.
 

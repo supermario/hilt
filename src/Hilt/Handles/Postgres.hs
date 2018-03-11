@@ -3,13 +3,13 @@
 module Hilt.Handles.Postgres
   (module Hilt.Handles.Postgres) where
 
-import           Data.Int (Int64)
-import           Control.Monad.Logger         (NoLoggingT)
-import           Control.Monad.Trans.Resource (ResourceT)
-import           Control.Monad.Reader         (ReaderT)
-import           Database.Persist.Sql
+import Data.Int (Int64)
+import Data.Text (Text)
+import Control.Monad.Logger         (NoLoggingT)
+import Control.Monad.Trans.Resource (ResourceT)
+import Control.Monad.Reader         (ReaderT)
+import Database.Persist.Sql
 import qualified Database.PostgreSQL.Simple as SQL
-
 
 type DbInfo = [TableInfo]
 
@@ -30,6 +30,7 @@ data Handle = Handle
   , query_ :: forall a . (SQL.FromRow a) => SQL.Query -> IO [a]
   , query  :: forall a b . (SQL.FromRow a, SQL.ToRow b) => SQL.Query -> b -> IO [a]
   , execute :: forall b . (SQL.ToRow b) => SQL.Query -> b -> IO Int64
+  , listen :: SQL.Query -> (Text -> IO ()) -> IO ()
   , dbInfo :: IO DbInfo
   }
 
