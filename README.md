@@ -61,14 +61,11 @@ With the Haskell tool [`stack`](https://github.com/commercialhaskell/stack) inst
   - Add `default-extensions: OverloadedStrings`
 - In your `stack.yml` either add or merge the following settings:
   ```yaml
-  packages:
-  - location:
-      git: https://github.com/supermario/hilt.git
-      commit: 31662bfec3650de22e96ff9b5ea7e147692e7562 # Current Master Sha
+  extra-deps:
+  - git: https://github.com/supermario/hilt.git
+    commit: 61347dfdcd9df90a7c90203b7f3cd8d16a347768 # Current Master Sha
   ```
   Stack doesn't support a `master` target, so you'll need to pin the latest SHA until Hilt is released.
-
-
 
 
 ## Services
