@@ -122,7 +122,7 @@ forceSSL = M.forceSSL
 appCorsResourcePolicy :: CorsResourcePolicy
 appCorsResourcePolicy = CorsResourcePolicy
   { corsOrigins        = Nothing
-  , corsMethods        = ["OPTIONS", "GET", "PUT", "POST"]
+  , corsMethods        = ["OPTIONS", "GET", "PUT", "POST", "DELETE"]
   , corsRequestHeaders = ["Authorization", "Content-Type", "Origin"]
   , corsExposedHeaders = Nothing
   , corsMaxAge         = Nothing
