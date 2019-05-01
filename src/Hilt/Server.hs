@@ -5,10 +5,10 @@ import Data.ByteString (ByteString)
 import Data.Function ((&))
 
 import qualified Network.Wai.Handler.Warp as W
-import Network.HTTP.Types                (status404)
+import Network.HTTP.Types                (status404, status200)
 import Network.WebSockets                (ServerApp, defaultConnectionOptions)
 import System.FilePath                   ((</>))
-import Network.Wai                       (Application, Middleware, responseLBS)
+import Network.Wai                       (Application, Middleware, responseLBS, responseFile)
 import Network.Wai.Handler.WebSockets    (websocketsOr)
 import Network.Wai.Middleware.AddHeaders (addHeaders)
 import Network.Wai.Middleware.Cors       (CorsResourcePolicy(..), cors)
@@ -16,6 +16,7 @@ import Network.Wai.Middleware.HttpAuth   (basicAuth)
 import Network.Wai.Middleware.Static     (staticPolicy, policy, Policy)
 import Network.Wai.Middleware.Gzip       (gzip, def)
 import qualified Network.Wai.Middleware.ForceSSL as M (forceSSL)
+import System.IO                         (FilePath)
 
 import qualified Hilt.Config as Config
 import qualified Hilt.SocketServer as SocketServer
@@ -32,6 +33,15 @@ runHttp = boot
 runWebsocket :: SocketServer.Handle -> Middlewares -> IO ()
 runWebsocket socketHandle middlewares = do
   let backupApp _ respond = respond $ responseLBS status404 [] "Not found."
+      waiApp = websocketsOr defaultConnectionOptions (SocketServer.app socketHandle) backupApp
+
+  boot waiApp middlewares
+
+
+{- Fork a thread and boot the websocket server as a Wai app on Warp, with a filepath fallback for 404s -}
+runWebsocketWithFallback :: SocketServer.Handle -> Middlewares -> FilePath -> IO ()
+runWebsocketWithFallback socketHandle middlewares filepath = do
+  let backupApp _ respond = respond $ responseFile status200 [] filepath Nothing
       waiApp = websocketsOr defaultConnectionOptions (SocketServer.app socketHandle) backupApp
 
   boot waiApp middlewares
